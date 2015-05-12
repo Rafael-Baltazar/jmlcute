@@ -1,0 +1,16 @@
+These programs are part of the AspectJML project.
+Copyright (C) 2008-2014 Federal University of Pernambuco and 
+University of Central Florida
+
+These programs are distributed in the hope that they will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License (for
+most sources) and the GNU Lesser General Public License (for the
+runtime libraries and specifications of the JDK libraries) along with
+this release (see the files COPYING.txt and LesserGPL.txt,
+respectively); if not, write to the Free Software Foundation, Inc., 51
+Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+

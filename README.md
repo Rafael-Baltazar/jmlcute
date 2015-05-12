@@ -16,3 +16,7 @@ Run
 ---
 To run jmlcute on the project within src/main/java, run './debugJMLCute'.
 
+Help
+----
+If you find a bug or cannot build or run this project, please create an issue in this repository.
+
