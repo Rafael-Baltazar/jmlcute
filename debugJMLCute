@@ -1,0 +1,86 @@
+#!/bin/bash
+# SRC_PATH needs to be inside the directory that has the Vagrantfile.
+export SRC_PATH=src/main/java/
+export LIB_PATH=
+
+# Prepare
+TARGET_DIR=target
+CLASSES_DIR=main/java/
+CROSSREFS_DIR=main/crossref/
+rm -rf $TARGET_DIR
+mkdir $TARGET_DIR
+mkdir $TARGET_DIR/main/
+mkdir $TARGET_DIR/$CLASSES_DIR
+mkdir $TARGET_DIR/$CROSSREFS_DIR
+
+cd $TARGET_DIR
+
+TARGET_DIR=.
+export SRC_PATH=../$SRC_PATH
+export LIB_PATH=../$LIB_PATH
+export JAVA_LIB_PATH=..
+export LD_LIBRARY_PATH=..
+export PATH=$PATH:..
+
+# Print aspects
+#echo "Printing Aspects"
+#export CLASSPATH=../aspectjml.jar:../jcute.jar
+#java org.jmlspecs.ajmlrac.Main --destination $CLASSES_DIR --sourcepath $SRC_PATH --classpath $CLASSPATH --source=1.7 --crosscuttingContractSpecifications --adviceChecking --defaultNonNull --mustBeExecutable --crossrefs $CROSSREFS_DIR --ajWeaver ajc -P pt.ulisboa.tecnico
+
+# Weave aspects at compile time
+echo "Weaving"
+export CLASSPATH=../aspectjml.jar:../jcute.jar
+java org.aspectj.tools.ajc.Main -source 1.7 -d $CLASSES_DIR $SRC_PATH/pt/ulisboa/tecnico/Run.java $SRC_PATH/pt/ulisboa/tecnico/Add.java $SRC_PATH/*.aj
+
+# Instrument
+echo "Instrumenting"
+# Soot is part of both jcute and aspectjml, so changing their order in the CLASSPATH will break the script.
+export CLASSPATH=$CLASSES_DIR:../jcute.jar:../aspectjml.jar
+java -Dcute.sequential=true cute.instrument.CuteInstrumenter -keep-line-number -d $CLASSES_DIR -x cute -x lpsolve --app pt.ulisboa.tecnico.Run
+
+# Concolically execute and Generate a JUnit Test Case per execution.
+ITER=10;
+VM_ARGS="-Xmx512m -Xms512m"
+CUTE_ARGS=-p:1:-m:2
+for i in $(seq 1 "$ITER")
+do
+
+# Concolically Execute the main class
+  export CLASSPATH=$CLASSES_DIR:../jcute.jar
+  EXECUTE="java $VM_ARGS -Djava.library.path=$JAVA_LIB_PATH -Dcute.args="$CUTE_ARGS" pt.ulisboa.tecnico.Run ;"
+
+  if [ "$PMSG" != "0" ]
+  then
+    echo "[Execution Path $i] $EXECUTE"
+  fi
+
+  $EXECUTE
+  ret="$?";
+  ret2="$((ret&2))";
+  if [[ ("$ret2" -eq "2") ]]
+  then
+    exit
+  else
+    CUTE_ARGS=-p:1
+    if [ "$ret" != "0" ]
+    then
+      continue
+    fi
+  fi
+
+# Generate JUnit Test Case
+echo "Generating Test Case $i"
+## TODO: Remove hardcoded properties
+  JUNIT_DIR=$TARGET/test/java/pt/ulisboa/tecnico
+  JUNIT_PKG=pt.ulisboa.tecnico
+  JUNIT_CNAME=Add
+  JUNIT_FNAME=execute
+  JUNIT_RUNCOUNT=$i
+  JUNIT_LAST_DIR=. # The directory that contains the current junitInputFile.
+  export CLASSPATH=$CLASSES_DIR:../jcute.jar
+  java $VM_ARGS cute.concolic.logging.JUnitTestGenerator $JUNIT_DIR $JUNIT_PKG $JUNIT_CNAME $JUNIT_FNAME $JUNIT_RUNCOUNT $JUNIT_LAST_DIR
+done
+
+# Report Branch Coverage
+java -classpath jcute.jar cute.concolic.logging.BranchCoverageLog
+
