@@ -1,3 +1,20 @@
+# IntelliJ
+*.iml
+.idea/
+## File-based project format
+*.ipr
+*.iws
+## Plugin-specific files
+/out/
+## mpeltonen/sbt-idea plugin
+.idea_modules/
+## JIRA plugin
+atlassian-ide-plugin.xml
+# Crashlytics plugin (for Android Studio and IntelliJ)
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+
 # Vagrant
 .vagrant/
 
@@ -6,9 +23,7 @@ target/
 
 # Java
 *.class
-
 ## Mobile Tools for Java (J2ME)
 .mtj.tmp/
-
 ## virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*

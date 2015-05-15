@@ -1,8 +1,8 @@
 #!/bin/bash
 # SRC_PATH needs to be inside the directory that has the Vagrantfile.
-export SRC_PATH=src/main/java/
-export JUNIT_ROOT=src/test/java/
-export LIB_PATH=
+SRC_PATH=jmlcute-essentials/src/main/java/
+JUNIT_ROOT=jmlcute-essentials/src/test/java/
+LIB_PATH=
 
 # Prepare
 TARGET_DIR=target
@@ -16,27 +16,29 @@ mkdir -p $TARGET_DIR/$CROSSREFS_DIR
 cd $TARGET_DIR
 
 TARGET_DIR=.
-export SRC_PATH=../$SRC_PATH
-export JUNIT_ROOT=../$JUNIT_ROOT
-export LIB_PATH=../$LIB_PATH
-export JAVA_LIB_PATH=..
-export LD_LIBRARY_PATH=..
-export PATH=$PATH:..
+SRC_PATH=../$SRC_PATH
+JUNIT_ROOT=../$JUNIT_ROOT
+LIB_PATH=../$LIB_PATH
+JMLCUTE_JAR=../jmlcute.jar
+JCUTE_JAR=../lib/jcute.jar
+JAVA_LIB_PATH=..
+LD_LIBRARY_PATH=..
+PATH=$PATH:..
 
 # Print aspects
-#echo "Printing Aspects"
-#export CLASSPATH=../aspectjml.jar:../jcute.jar
-#java org.jmlspecs.ajmlrac.Main --destination $CLASSES_DIR --sourcepath $SRC_PATH --classpath $CLASSPATH --source=1.7 --crosscuttingContractSpecifications --adviceChecking --defaultNonNull --mustBeExecutable --crossrefs $CROSSREFS_DIR --ajWeaver ajc -P pt.ulisboa.tecnico
+echo "Printing Aspects"
+export CLASSPATH=$JMLCUTE_JAR
+java org.jmlspecs.ajmlrac.Main --destination $CLASSES_DIR --sourcepath $SRC_PATH --classpath $CLASSPATH --source=1.7 --crosscuttingContractSpecifications --adviceChecking --defaultNonNull --mustBeExecutable --crossrefs $CROSSREFS_DIR --ajWeaver ajc -P $SRC_PATH/pt/tecnico/ulisboa/Run.java
 
 # Weave aspects at compile time
 echo "Weaving"
-export CLASSPATH=../aspectjml.jar:../jcute.jar
-java org.aspectj.tools.ajc.Main -source 1.7 -d $CLASSES_DIR $SRC_PATH/pt/ulisboa/tecnico/Run.java $SRC_PATH/pt/ulisboa/tecnico/Add.java $SRC_PATH/*.aj
+export CLASSPATH=$JMLCUTE_JAR
+java org.aspectj.tools.ajc.Main -source 1.7 -d $CLASSES_DIR $SRC_PATH/pt/ulisboa/tecnico/Run.java $SRC_PATH/pt/ulisboa/tecnico/Add.java $CLASSES_DIR/*.aj
 
 # Instrument
 echo "Instrumenting"
-# Soot is part of both jcute and aspectjml, so changing their order in the CLASSPATH will break the script.
-export CLASSPATH=$CLASSES_DIR:../jcute.jar:../aspectjml.jar
+# Changing the order in the CLASSPATH will break the script, because Soot is part of both jcute and abc compiler.
+export CLASSPATH=$CLASSES_DIR:$JCUTE_JAR:$JMLCUTE_JAR
 java -Dcute.sequential=true cute.instrument.CuteInstrumenter -keep-line-number -d $CLASSES_DIR -x cute -x lpsolve --app pt.ulisboa.tecnico.Run
 
 # Concolically execute and Generate a JUnit Test Case per execution.
@@ -55,18 +57,21 @@ for i in $(seq 1 "$ITER")
 do
   EXECUTE="java $VM_ARGS -Djava.library.path=$JAVA_LIB_PATH -Dcute.args="$CUTE_ARGS" pt.ulisboa.tecnico.Run ;"
   echo "[Execution Path $i] $EXECUTE"
-  export CLASSPATH=$CLASSES_DIR:../jcute.jar
+  export CLASSPATH=$CLASSES_DIR:$JMLCUTE_JAR
   $EXECUTE
-  ret2="$(($?&2))";
+  RET="$?"
+  RET2="$(($RET&2))";
+  echo "RET=$RET"
+  echo "RET2=$RET2"
   CUTE_ARGS=-p:1
 
   # Generate Test Case
   echo "Generating Test Case $i"
   JUNIT_RUNCOUNT=$i
-  export CLASSPATH=$CLASSES_DIR:../jcute.jar
+  export CLASSPATH=$CLASSES_DIR:$JMLCUTE_JAR
   java $VM_ARGS cute.concolic.logging.JUnitTestGenerator $JUNIT_DIR $JUNIT_PKG $JUNIT_CNAME $JUNIT_FNAME $JUNIT_RUNCOUNT $JUNIT_LAST_DIR
 
-  if [[ ("$ret2" -eq "2") ]]
+  if [[ ("$RET2" -eq "2") ]]
   then
     break
   fi
@@ -74,5 +79,5 @@ done
 
 # Report Branch Coverage
 COVERAGE_LOG_DIR=.
-export CLASSPATH=../jcute.jar
+export CLASSPATH=$JMLCUTE_JAR
 java cute.concolic.logging.BranchCoverageLog $COVERAGE_LOG_DIR
