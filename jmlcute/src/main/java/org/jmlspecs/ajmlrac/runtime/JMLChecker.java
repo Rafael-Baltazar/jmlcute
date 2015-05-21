@@ -1145,11 +1145,7 @@ public class JMLChecker implements JMLOption {
     }
 
     public static Throwable getXPostconditionError() {
-        if (JMLChecker.xPostconditionError != null) {
-            return JMLChecker.xPostconditionError;
-        } else {
-            return null;
-        }
+        return JMLChecker.xPostconditionError;
     }
 
     public static void resetXPostconditionError() {

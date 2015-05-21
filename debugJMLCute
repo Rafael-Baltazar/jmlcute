@@ -25,29 +25,33 @@ JAVA_LIB_PATH=..
 LD_LIBRARY_PATH=..
 PATH=$PATH:..
 
-# Print aspects
-echo "Printing Aspects"
-export CLASSPATH=$JMLCUTE_JAR
-java org.jmlspecs.ajmlrac.Main --destination $CLASSES_DIR --sourcepath $SRC_PATH --classpath $CLASSPATH --source=1.7 --crosscuttingContractSpecifications --adviceChecking --defaultNonNull --mustBeExecutable --crossrefs $CROSSREFS_DIR --ajWeaver ajc -P $SRC_PATH/pt/tecnico/ulisboa/Run.java
 
-# Weave aspects at compile time
+echo "Printing Aspects"
+JAVA_FILES=$(find $SRC_PATH -name "*.java" | tr "\n" " ")
+export CLASSPATH=$JMLCUTE_JAR
+java org.jmlspecs.ajmlrac.Main --destination $CLASSES_DIR --sourcepath $SRC_PATH --classpath $CLASSPATH --source=1.7 --crosscuttingContractSpecifications --adviceChecking --defaultNonNull --mustBeExecutable --crossrefs $CROSSREFS_DIR --ajWeaver ajc -P $JAVA_FILES
+
 echo "Weaving"
 export CLASSPATH=$JMLCUTE_JAR
-java org.aspectj.tools.ajc.Main -source 1.7 -d $CLASSES_DIR $SRC_PATH/pt/ulisboa/tecnico/Run.java $SRC_PATH/pt/ulisboa/tecnico/Add.java $CLASSES_DIR/*.aj
+java org.aspectj.tools.ajc.Main -source 1.7 -d $CLASSES_DIR $JAVA_FILES $CLASSES_DIR/*.aj
+# For now testing aspect printing.
+# exit
 
-# Instrument
+#echo "Compiling"
+#export CLASSPATH=$JMLCUTE_JAR
+#javac -d $CLASSES_DIR -sourcepath $SRC_PATH -classpath $CLASSPATH $SRC_PATH/pt/ulisboa/tecnico/Run.java
+
 echo "Instrumenting"
 # Changing the order in the CLASSPATH will break the script, because Soot is part of both jcute and abc compiler.
 export CLASSPATH=$CLASSES_DIR:$JCUTE_JAR:$JMLCUTE_JAR
 java -Dcute.sequential=true cute.instrument.CuteInstrumenter -keep-line-number -d $CLASSES_DIR -x cute -x lpsolve --app pt.ulisboa.tecnico.Run
 
-# Concolically execute and Generate a JUnit Test Case per execution.
 ## TODO: Remove hardcoded properties
 JUNIT_DIR=$JUNIT_ROOT/pt/ulisboa/tecnico
 mkdir -p $JUNIT_DIR
 JUNIT_PKG=pt.ulisboa.tecnico
-JUNIT_CNAME=Add
-JUNIT_FNAME=execute
+JUNIT_CNAME=Run
+JUNIT_FNAME=main
 JUNIT_LAST_DIR=. # The directory that contains the current junitInputFile.
 
 ITER=10;

@@ -19,6 +19,7 @@ crashlytics-build.properties
 .vagrant/
 
 # Target
+jmlcute.jar
 target/
 
 # Java

@@ -165,7 +165,7 @@ public abstract class AssertionMethod extends TransUtils {
 			code.append("static ");
 		code.append(returnType).append(" ").append(typeDecl.ident()+".").append(name);
 
-		// foraml parameters
+		// formal parameters
 		code.append("(");
 		if (parameters != null) {
 			for (int i = 0; i < parameters.length; i++) {
