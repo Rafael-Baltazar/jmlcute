@@ -239,22 +239,22 @@ public class PostconditionMethodAdvice extends PreOrPostconditionMethod {
         } else {
             qcode = this.getQuantifierInnerClasses(nPostPred.replace("object$rac", "rac$result"));
             if (!(methodReturnType.equals("void"))) {
-                code.append("    ").append(AspectUtil.processMethSig(methodReturnType)).append(" ").append("rac$result");
+                code.append("    ").append(AspectUtil.processMethSig(methodReturnType)).append(" rac$result");
                 code.append(" = ").append(TransUtils.defaultValue(methodDecl.returnType())).append(";\n");
                 if (qcode.contains("rac$result")) {
-                    code.append("    final ").append(AspectUtil.processMethSig(methodReturnType)).append(" ").append("rac$result$qcode;\n");
+                    code.append("    final ").append(AspectUtil.processMethSig(methodReturnType)).append(" rac$result$qcode;\n");
                     qcode = qcode.replace("rac$result", "rac$result$qcode");
                 }
             }
             if (methodDecl.isConstructor() && (instrumentationType.equals("callSite") || instrumentationType.equals("clientAwareChecking"))) {
                 String classQualifiedName = this.typeDecl.getCClass().getJavaName();
-                code.append("    ").append(classQualifiedName).append(" ").append("rac$result");
+                code.append("    ").append(classQualifiedName).append(" rac$result");
                 code.append(" = ").append(TransUtils.defaultValue(methodDecl.returnType())).append(";\n");
                 if (qcode.contains("rac$result")) {
-                    code.append("    final ").append(this.methodDecl.getMethod().owner().getJavaName()).append(" ").append("rac$result$qcode;\n");
+                    code.append("    final ").append(this.methodDecl.getMethod().owner().getJavaName()).append(" rac$result$qcode;\n");
                     qcode = qcode.replace("rac$result", "rac$result$qcode");
                 } else if (qcode.contains("object$rac")) {
-                    code.append("    final ").append(this.methodDecl.getMethod().owner().getJavaName()).append(" ").append("rac$result$qcode;\n");
+                    code.append("    final ").append(this.methodDecl.getMethod().owner().getJavaName()).append(" rac$result$qcode;\n");
                     qcode = qcode.replace("object$rac", "rac$result$qcode");
                 }
             }
@@ -449,12 +449,7 @@ public class PostconditionMethodAdvice extends PreOrPostconditionMethod {
         }
         code.append("    try {\n");
         {
-            if (isMethodCrosscutSpecChecking) {
-                code.append("      rac$result = ").append(this.buildCallProceed(parameters, instrumentationType, isMethodCrosscutSpecChecking, isFlexibleXCS)).append(";").append("//executing the method\n");
-                if (qcode.contains("rac$result")) {
-                    code.append("      rac$result$qcode = rac$result;\n");
-                }
-            } else if ((!(methodReturnType.equals("void"))) || (methodDecl.isConstructor() && (instrumentationType.equals("callSite") || instrumentationType.equals("clientAwareChecking")))) {
+            if (isMethodCrosscutSpecChecking || !methodReturnType.equals("void") || (methodDecl.isConstructor() && (instrumentationType.equals("callSite") || instrumentationType.equals("clientAwareChecking")))) {
                 code.append("      rac$result = ").append(this.buildCallProceed(parameters, instrumentationType, isMethodCrosscutSpecChecking, isFlexibleXCS)).append(";//executing the method\n");
                 if (qcode.contains("rac$result")) {
                     code.append("      rac$result$qcode = rac$result;\n");
@@ -482,8 +477,7 @@ public class PostconditionMethodAdvice extends PreOrPostconditionMethod {
         code.append("    } catch (Throwable rac$e) {\n");
         {
             for (Iterator iterator = xPostCode.iterator(); iterator.hasNext(); ) {
-                String signalClause = (String) iterator.next();
-                code.append(signalClause);
+                code.append(iterator.next());
             }
             code.append("\n");
             code.append(this.xPostRethrowStmt());

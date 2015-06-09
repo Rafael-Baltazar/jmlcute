@@ -4,6 +4,11 @@ SRC_PATH=jmlcute-essentials/src/main/java/
 JUNIT_ROOT=jmlcute-essentials/src/test/java/
 LIB_PATH=
 
+## TODO: Enable multiple units.
+JUNIT_PKG=pt.ulisboa.tecnico
+JUNIT_CNAME=Run
+JUNIT_FNAME=main
+
 # Prepare
 TARGET_DIR=target
 CLASSES_DIR=main/java/
@@ -12,7 +17,6 @@ rm -rf $TARGET_DIR
 mkdir $TARGET_DIR
 mkdir -p $TARGET_DIR/$CLASSES_DIR
 mkdir -p $TARGET_DIR/$CROSSREFS_DIR
-
 cd $TARGET_DIR
 
 TARGET_DIR=.
@@ -21,57 +25,49 @@ JUNIT_ROOT=../$JUNIT_ROOT
 LIB_PATH=../$LIB_PATH
 JMLCUTE_JAR=../jmlcute.jar
 JCUTE_JAR=../lib/jcute.jar
-JAVA_LIB_PATH=..
-LD_LIBRARY_PATH=..
+export JAVA_LIB_PATH=..
+export LD_LIBRARY_PATH=..
 PATH=$PATH:..
 
-
-echo "Printing Aspects"
 JAVA_FILES=$(find $SRC_PATH -name "*.java" | tr "\n" " ")
+
+JUNIT_DIR=$JUNIT_ROOT/$(echo "$JUNIT_PKG" | tr "." "/")
+mkdir -p $JUNIT_DIR
+
+# Printing Aspects
 export CLASSPATH=$JMLCUTE_JAR
 java org.jmlspecs.ajmlrac.Main --destination $CLASSES_DIR --sourcepath $SRC_PATH --classpath $CLASSPATH --source=1.7 --crosscuttingContractSpecifications --adviceChecking --defaultNonNull --mustBeExecutable --crossrefs $CROSSREFS_DIR --ajWeaver ajc -P $JAVA_FILES
 
-echo "Weaving"
+# Weaving
 export CLASSPATH=$JMLCUTE_JAR
 java org.aspectj.tools.ajc.Main -source 1.7 -d $CLASSES_DIR $JAVA_FILES $CLASSES_DIR/*.aj
-# For now testing aspect printing.
-# exit
 
-#echo "Compiling"
-#export CLASSPATH=$JMLCUTE_JAR
-#javac -d $CLASSES_DIR -sourcepath $SRC_PATH -classpath $CLASSPATH $SRC_PATH/pt/ulisboa/tecnico/Run.java
+# Compiling
+# export CLASSPATH=$JMLCUTE_JAR
+# javac -d $CLASSES_DIR -sourcepath $SRC_PATH -classpath $CLASSPATH $SRC_PATH/pt/ulisboa/tecnico/Run.java
 
-echo "Instrumenting"
-# Changing the order in the CLASSPATH will break the script, because Soot is part of both jcute and abc compiler.
+# Instrumenting
+# Changing the order in the CLASSPATH will break the script, because different versions of Soot are in both jcute and abc compiler.
 export CLASSPATH=$CLASSES_DIR:$JCUTE_JAR:$JMLCUTE_JAR
-java -Dcute.sequential=true cute.instrument.CuteInstrumenter -keep-line-number -d $CLASSES_DIR -x cute -x lpsolve --app pt.ulisboa.tecnico.Run
-
-## TODO: Remove hardcoded properties
-JUNIT_DIR=$JUNIT_ROOT/pt/ulisboa/tecnico
-mkdir -p $JUNIT_DIR
-JUNIT_PKG=pt.ulisboa.tecnico
-JUNIT_CNAME=Run
-JUNIT_FNAME=main
-JUNIT_LAST_DIR=. # The directory that contains the current junitInputFile.
+java -Dcute.sequential=true cute.instrument.CuteInstrumenter -keep-line-number -d $CLASSES_DIR -x cute -x lpsolve --app $JUNIT_PKG.$JUNIT_CNAME
 
 ITER=10;
 CUTE_ARGS=-p:1:-m:2
 VM_ARGS="-Xmx512m -Xms512m"
 for i in $(seq 1 "$ITER")
 do
-  EXECUTE="java $VM_ARGS -Djava.library.path=$JAVA_LIB_PATH -Dcute.args="$CUTE_ARGS" pt.ulisboa.tecnico.Run ;"
-  echo "[Execution Path $i] $EXECUTE"
+  echo "[Execution Path $i]"
   export CLASSPATH=$CLASSES_DIR:$JMLCUTE_JAR
-  $EXECUTE
+  jdb $VM_ARGS -Djava.library.path=$JAVA_LIB_PATH -Dcute.args="$CUTE_ARGS" $JUNIT_PKG.$JUNIT_CNAME
   RET="$?"
-  RET2="$(($RET&2))";
+  RET2="$(($RET&2))"
   echo "RET=$RET"
   echo "RET2=$RET2"
   CUTE_ARGS=-p:1
 
-  # Generate Test Case
-  echo "Generating Test Case $i"
+  # Generating Test Case
   JUNIT_RUNCOUNT=$i
+  JUNIT_LAST_DIR=. # The directory that contains the current junitInputFile.
   export CLASSPATH=$CLASSES_DIR:$JMLCUTE_JAR
   java $VM_ARGS cute.concolic.logging.JUnitTestGenerator $JUNIT_DIR $JUNIT_PKG $JUNIT_CNAME $JUNIT_FNAME $JUNIT_RUNCOUNT $JUNIT_LAST_DIR
 
@@ -85,3 +81,4 @@ done
 COVERAGE_LOG_DIR=.
 export CLASSPATH=$JMLCUTE_JAR
 java cute.concolic.logging.BranchCoverageLog $COVERAGE_LOG_DIR
+

@@ -639,8 +639,7 @@ public class JMLChecker implements JMLOption {
 
     private static void recordPreconditionError(String preErrorMsg,
                                                 long visibility, String methodName) {
-        JMLPreconditionError jpe = null;
-
+        JMLPreconditionError jpe;
         if (visibility == Constants.ACC_PUBLIC) {
             jpe = JMLChecker.getMethPreconditionError(methodName);
             if (jpe != null) {
@@ -935,7 +934,6 @@ public class JMLChecker implements JMLOption {
                     String efectiveConst = (String) constraintSat.get(j);
                     errorMsg += "\n" + "[satisfied] " + efectiveConst;
                 }
-
                 constraintSat = new Vector();
             }
             if (JMLChecker.constraintError instanceof JMLPublicHistoryConstraintError) {

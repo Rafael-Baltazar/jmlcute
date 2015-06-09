@@ -1,22 +1,15 @@
 package pt.ulisboa.tecnico;
 
-public class Run {
-  /*@
-    @ requires o == null;
-    @ assignable \nothing;
-    @ signals (NullPointerException e) \old(o) == null;
-   @*/
-  public static void isNull(Object o) {
-    if (o == null) {
-      throw new NullPointerException();
-    }
-  }
+import pt.ulisboa.tecnico.internal.PositivePowerImpl;
 
+public class Run {
   public static void main(String[] args) {
     try {
-      int x = cute.Cute.input.Integer();
-      Fib a = ((Fib) cute.Cute.input.Object("pt.ulisboa.tecnico.internal.FibMemoized"));
-      a.get(x);
+      int n = cute.Cute.input.Integer();
+      int p = cute.Cute.input.Integer();
+      PositivePower f = new PositivePowerImpl();
+      cute.Cute.Assume(n < 4 && p < 4);
+      f.get(n,p);
     } catch(Throwable t) {
       t.printStackTrace();
     }
