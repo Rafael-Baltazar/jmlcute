@@ -18,7 +18,7 @@ If you have a 64-bit Linux system, then jmlcute is already built.
 
 Run
 ---
-To run jmlcute on the project within src/main/java, run './debugjmlcute'.
+To run jmlcute over the project within src/main/java, run './runjmlcute TestDoubleRecursion'.
 
 Help
 ----
