@@ -8,7 +8,7 @@ public class TestRecursion {
       int n = cute.Cute.input.Integer();
       int p = cute.Cute.input.Integer();
       PositivePower f = new PositivePowerImpl();
-      cute.Cute.Assume(n < 4 && p < 4);
+      cute.Cute.Assume(n < 4 && p > 0 && p < 4);
       f.get(n,p);
     } catch(Throwable t) {
       t.printStackTrace();

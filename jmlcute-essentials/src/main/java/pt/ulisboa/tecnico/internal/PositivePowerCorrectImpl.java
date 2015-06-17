@@ -1,14 +1,18 @@
 package pt.ulisboa.tecnico.internal;
 
-import pt.ulisboa.tecnico.PositivePower;
-
-public class PositivePowerCorrectImpl implements PositivePower {
-  public int get(int n, int p) {
-    if(p == 0) {
-      return 1;
-    } else {
-      return n*get(n, p-1);
+// Used in specifications.
+//@ pure
+public class PositivePowerCorrectImpl {
+    private int get(int n, int p, int res) {
+        if (p == 0) {
+            return res;
+        } else {
+            return get(n, p - 1, n * res);
+        }
     }
-  }
+
+    public int get(int n, int p) {
+        return get(n, p, 1);
+    }
 }
 
