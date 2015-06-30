@@ -24,7 +24,8 @@ public class MainGenerator {
         Class clazz = Class.forName(fullyQualifiedClassName);
         Method[] methods = clazz.getDeclaredMethods();
         for (Method method : methods) {
-            if (Modifier.isPublic(method.getModifiers())) {
+            final int modifiers = method.getModifiers();
+            if (Modifier.isPublic(modifiers) && !Modifier.isStatic(modifiers)) {
                 Type[] parameterTypes = method.getGenericParameterTypes();
                 StringBuilder sb = generateMethod(fullyQualifiedClassName,
                         method.getName(), parameterTypes);
@@ -53,11 +54,13 @@ public class MainGenerator {
         indentation = new Indentation();
         appendPackage(fullyQualifiedClassName, sb);
         sb.append("\n");
-        appendJavaClassHeader(fullyQualifiedClassName, functionName, parameterTypes, sb);
+        appendJavaClassHeader(fullyQualifiedClassName, functionName,
+                parameterTypes, sb);
         indentation.increase();
         appendMainHeader(sb);
         indentation.increase();
-        appendMainBody(sb);
+        appendMainBody(fullyQualifiedClassName, functionName, parameterTypes,
+                sb);
         indentation.decrease();
         appendMainFooter(sb);
         indentation.decrease();
@@ -65,22 +68,35 @@ public class MainGenerator {
         return sb;
     }
 
+    /**
+     * Appends the package name to sb given the fullyQualifiedClassName.
+     *
+     * @param fullyQualifiedClassName the fully qualified of the class under
+     *                                test.
+     * @param sb                      the StringBuilder to append to.
+     * @return sb with the appended package.
+     */
     private StringBuilder appendPackage(String fullyQualifiedClassName,
                                         StringBuilder sb) {
+        sb.append(indentation).append("package ");
         String[] split = fullyQualifiedClassName.split("\\.");
-        for (String string : split) {
-
+        String separator = "";
+        for (int i = 0; i < split.length - 1; i++) {
+            sb.append(separator).append(split[i]);
+            separator = ".";
         }
-        return sb.append(indentation).append("package ").append(";\n");
+        return sb.append(";\n");
     }
 
     /**
      * Appends a java class header to sb. Example: com.App.main(App a, Integer
-     * i) will become "public class jmlcute__com__App__main__App_Integer {\n"
+     * i) will become "public class jmlcute__com__App__main_App_Integer {\n"
      *
-     * @param fullyQualifiedClassName the fully qualified name of the class under test.
+     * @param fullyQualifiedClassName the fully qualified name of the class
+     *                                under test.
      * @param functionName            the name of the function under test.
-     * @param parameterTypes          the types of the parameters of the function under test.
+     * @param parameterTypes          the types of the parameters of the
+     *                                function under test.
      * @param sb                      the StringBuilder to append to.
      * @return sb with the appended Java class header.
      */
@@ -89,10 +105,11 @@ public class MainGenerator {
             Type[] parameterTypes, StringBuilder sb) {
         sb.append(indentation).append("public class jmlcute__")
                 .append(fullyQualifiedClassName.replaceAll("\\.", "__"))
-                .append(functionName).append("__");
+                .append("__").append(functionName).append("_");
         String separator = "";
         for (Type type : parameterTypes) {
-            sb.append(separator).append(type.toString());
+            String typeName = ((Class) type).getName().replaceAll("\\.", "__");
+            sb.append(separator).append(typeName);
             separator = "_";
         }
         return sb.append(" {\n");
@@ -110,7 +127,23 @@ public class MainGenerator {
         return sb.append(indentation).append("}\n");
     }
 
-    private StringBuilder appendMainBody(StringBuilder sb) {
-        return sb.append(indentation).append(";\n");
+    private StringBuilder appendMainBody(String fullyQualifiedClasName, String functionName, Type[] parameterTypes, StringBuilder sb) {
+        sb.append(indentation).append(fullyQualifiedClasName)
+                .append(" receiver = cute.Cute.input.Object(\"")
+                .append(fullyQualifiedClasName).append("\");\n");
+        sb.append(indentation).append("cute.Cute.Assume(receiver != null);\n");
+        for (int i = 0; i < parameterTypes.length; i++) {
+            String typeName = ((Class) parameterTypes[i]).getName();
+            sb.append(indentation).append(typeName).append(" arg").append(i)
+                    .append(" = cute.Cute.input.Object(\"").append(typeName)
+                    .append("\");\n");
+        }
+        sb.append(indentation).append("receiver.").append(functionName).append("(");
+        String separator = "";
+        for (int i = 0; i < parameterTypes.length; i++) {
+            sb.append(separator).append("arg").append(i);
+            separator = ", ";
+        }
+        return sb.append(");\n");
     }
 }

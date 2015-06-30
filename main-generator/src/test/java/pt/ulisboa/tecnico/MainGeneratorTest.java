@@ -25,7 +25,7 @@ public class MainGeneratorTest extends TestCase {
     }
 
     /**
-     * Test App.
+     * Test App with a public method app and several non-public non-instance methods.
      */
     public void testApp() {
         MainGenerator mainGenerator = new MainGenerator();
@@ -40,15 +40,15 @@ public class MainGeneratorTest extends TestCase {
         StringBuilder sb = new StringBuilder();
         sb.append("package App;\n");
         sb.append("\n");
-        sb.append("public class jmlcute__App__App__app_App_App {\n");
+        sb.append("public class jmlcute__App__App__app_App__App_App__App {\n");
         sb.append("  public static void main(String[] args) {\n");
-        sb.append("    App.App receiver = cute.Cute.input.Object(\"\");\n");
+        sb.append("    App.App receiver = cute.Cute.input.Object(\"App.App\");\n");
         sb.append("    cute.Cute.Assume(receiver != null);\n");
         sb.append("    App.App arg0 = cute.Cute.input.Object(\"App.App\");\n");
         sb.append("    App.App arg1 = cute.Cute.input.Object(\"App.App\");\n");
         sb.append("    receiver.app(arg0, arg1);\n");
         sb.append("  }\n");
         sb.append("}\n");
-        assertTrue("stringBuilders[0] is incorrect.", sb.toString().equals(stringBuilders[0].toString()));
+        assertTrue("StringBuilders[0] is incorrect.", sb.toString().equals(stringBuilders[0].toString()));
     }
 }
