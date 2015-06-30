@@ -1,0 +1,55 @@
+// Generated from JmlExprID.t
+package org.jmlspecs.checker;
+
+public interface JmlExprIDTokenTypes extends org.jmlspecs.checker.JmlTopIDTokenTypes {
+  int	LITERAL_BS_TYPE = 119;
+  int	LITERAL_BS_bigint = 120;
+  int	LITERAL_BS_bigint_math = 121;
+  int	LITERAL_BS_duration = 122;
+  int	LITERAL_BS_elemtype = 123;
+  int	LITERAL_BS_everything = 124;
+  int	LITERAL_BS_exists = 125;
+  int	LITERAL_BS_forall = 126;
+  int	LITERAL_BS_fresh = 127;
+  int	LITERAL_BS_into = 128;
+  int	LITERAL_BS_invariant_for = 129;
+  int	LITERAL_BS_is_initialized = 130;
+  int	LITERAL_BS_java_math = 131;
+  int	LITERAL_BS_lblneg = 132;
+  int	LITERAL_BS_lblpos = 133;
+  int	LITERAL_BS_lockset = 134;
+  int	LITERAL_BS_max = 135;
+  int	LITERAL_BS_min = 136;
+  int	LITERAL_BS_nonnullelements = 137;
+  int	LITERAL_BS_not_modified = 138;
+  int	LITERAL_BS_not_assigned = 139;
+  int	LITERAL_BS_not_specified = 140;
+  int	LITERAL_BS_nothing = 141;
+  int	LITERAL_BS_nowarn = 142;
+  int	LITERAL_BS_nowarn_op = 143;
+  int	LITERAL_BS_num_of = 144;
+  int	LITERAL_BS_old = 145;
+  int	LITERAL_BS_only_assigned = 146;
+  int	LITERAL_BS_only_accessed = 147;
+  int	LITERAL_BS_only_called = 148;
+  int	LITERAL_BS_only_captured = 149;
+  int	LITERAL_BS_other = 150;
+  int	LITERAL_BS_pre = 151;
+  int	LITERAL_BS_product = 152;
+  int	LITERAL_BS_reach = 153;
+  int	LITERAL_BS_real = 154;
+  int	LITERAL_BS_result = 155;
+  int	LITERAL_BS_safe_math = 156;
+  int	LITERAL_BS_same = 157;
+  int	LITERAL_BS_space = 158;
+  int	LITERAL_BS_such_that = 159;
+  int	LITERAL_BS_sum = 160;
+  int	LITERAL_BS_type = 161;
+  int	LITERAL_BS_typeof = 162;
+  int	LITERAL_BS_warn = 163;
+  int	LITERAL_BS_warn_op = 164;
+  int	LITERAL_BS_working_space = 165;
+  int	LITERAL_U_peer = 166;
+  int	LITERAL_U_rep = 167;
+  int	LITERAL_U_readonly = 168;
+}

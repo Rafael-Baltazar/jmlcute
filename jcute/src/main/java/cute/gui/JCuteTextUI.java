@@ -364,7 +364,7 @@ public class JCuteTextUI implements ProcessOwner{
                 }
                 JUnitTestGenerator.appendToJunitTestCase(
                         getOptionJUnitOutputFolderName(),getOptionJUnitPkgName(),
-                        mainClassName,mainFunName,x,f);
+                        mainClassName, x,f);
             }
         }
     }
@@ -456,7 +456,7 @@ public class JCuteTextUI implements ProcessOwner{
                 if(isOptionGenerateJUnit() && flag){
                     JUnitTestGenerator.appendToJunitTestCase(
                             getOptionJUnitOutputFolderName(),getOptionJUnitPkgName(),
-                            mainClassName,mainFunName,runCount,tmpLastFile);
+                            mainClassName, runCount,tmpLastFile);
                 }
             }
             if(!isCanceled && (getOptionLogLevel() ==LOG_ALL ||
@@ -625,7 +625,7 @@ public class JCuteTextUI implements ProcessOwner{
         setCompiled();
 
         JUnitTestGenerator.deleteJunitTestCase(getOptionJUnitOutputFolderName(),
-                getOptionJUnitPkgName(),mainClassName,mainFunName);
+                mainClassName);
     }
 
     public void cancelAction() {
@@ -748,7 +748,7 @@ public class JCuteTextUI implements ProcessOwner{
 
     public String getJUnitFileName() {
         File f = JUnitTestGenerator.getJUnitFileName(getOptionJUnitOutputFolderName(),
-                mainClassName,mainFunName);
+                mainClassName);
         if(f!=null && f.exists())
             return f.getAbsolutePath();
         return null;

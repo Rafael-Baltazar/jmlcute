@@ -53,8 +53,9 @@ public class Cute {
 }
 
 /**
- * AssertionFailedError is a subclass of Error. Assuming assumptions and assertions
- * are equivalent in this matter, AssumptionFailedError is also an Error.
+ * AssertionFailedError is a subclass of Error. Assuming assumptions and
+ * assertions are equivalent in this matter, AssumptionFailedError is also an
+ * Error.
  */
 class AssumptionFailedError extends Error {
 }

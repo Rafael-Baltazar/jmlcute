@@ -24,3 +24,7 @@ Help
 ----
 If you find a bug or cannot build or run this project, please contact one of the contributors.
 
+License
+-------
+All licenses are under the license folder.
+

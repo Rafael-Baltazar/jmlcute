@@ -53,7 +53,6 @@ fi
 export CLASSPATH=$CLASSES_DIR:$SOOT_JAR:$JMLCUTE_JAR
 java -Xmx900m -Dcute.sequential=true cute.instrument.CuteInstrumenter -keep-line-number -d $CLASSES_DIR -x cute -x lpsolve --app $JUNIT_PKG.$JUNIT_CNAME
 
-
 # Execute concollicaly and generate test case ITER times.
 ITER=10
 CUTE_ARGS=-p:1:-m:2
@@ -69,7 +68,7 @@ do
   JUNIT_RUNCOUNT=$i
   JUNIT_LAST_DIR=. # The directory that contains the current junitInputFile.
   export CLASSPATH=$CLASSES_DIR:$JMLCUTE_JAR
-  java $VM_ARGS cute.concolic.logging.JUnitTestGenerator $JUNIT_DIR $JUNIT_PKG $JUNIT_CNAME $JUNIT_FNAME $JUNIT_RUNCOUNT $JUNIT_LAST_DIR
+  java $VM_ARGS cute.concolic.logging.JUnitTestGenerator $JUNIT_DIR $JUNIT_PKG $JUNIT_CNAME $JUNIT_RUNCOUNT
   if [[ ("$RET2" -eq "2") ]]
   then
    break
