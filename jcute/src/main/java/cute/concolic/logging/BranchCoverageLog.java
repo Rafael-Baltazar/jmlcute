@@ -240,7 +240,7 @@ public class BranchCoverageLog implements Serializable{
         BranchCoverageLog bc = new BranchCoverageLog(null);
         try {
             if(dir==null)
-                in = new ObjectInputStream(new BufferedInputStream(new FileInputStream("tmpjcute/"+file)));
+                in = new ObjectInputStream(new BufferedInputStream(new FileInputStream("target/"+file)));
             else
                 in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(new File(dir,file))));
         } catch (IOException e) {

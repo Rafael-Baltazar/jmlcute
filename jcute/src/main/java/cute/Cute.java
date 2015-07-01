@@ -33,29 +33,25 @@ public class Cute {
                     Globals.globals.information.brackTrackAt = Globals.globals.path.size() - 1;
                 }
             }
-            throw new AssumptionFailedError();
+            throw new AssumeFailedError();
         }
     }
 
     public static void Assert(boolean b) {
         if (!b) {
             if (Globals.globals.initialized) {
-                System.err.println("Assertion failed");
-                Thread.dumpStack();
-                System.err.println("Exiting with error");
                 Globals.globals.information.returnVal = Cute.EXIT_ASSERT_FAILED + Globals.globals.information.returnVal;
                 Globals.globals.solver.predict();
-            } else {
-                throw new AssertionFailedError();
             }
+            throw new AssertFailedError();
         }
     }
 }
 
 /**
  * AssertionFailedError is a subclass of Error. Assuming assumptions and
- * assertions are equivalent in this matter, AssumptionFailedError is also an
+ * assertions are equivalent in this matter, AssumeFailedError is also an
  * Error.
  */
-class AssumptionFailedError extends Error {
+class AssumeFailedError extends Error {
 }

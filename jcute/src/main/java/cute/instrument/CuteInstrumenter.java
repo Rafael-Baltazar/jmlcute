@@ -83,13 +83,11 @@ int f(int x,int y){
 public class CuteInstrumenter extends BodyTransformer{
     private static CuteInstrumenter instance = new CuteInstrumenter();
     public SymbolTable st;
-//    private HashSet alreadyInstrumented;
     public static boolean isConcurrent = true;
     private static String mainClass;
 
     private CuteInstrumenter() {
         st = new SymbolTable();
-//        alreadyInstrumented = new HashSet();
     }
 
     public static CuteInstrumenter v(){

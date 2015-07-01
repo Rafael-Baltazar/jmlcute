@@ -4,6 +4,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import java.io.IOException;
+
 /**
  * Unit test for simple MainGeneratorApp.
  */
@@ -28,6 +30,13 @@ public class MainGeneratorAppTest extends TestCase {
      * Rigourous Test :-)
      */
     public void testApp() {
-        assertTrue(true);
+        final String[] args = new String[]{
+                "-d", "test-classes",
+                "samplePackageName.SampleSuperclassName"};
+        try {
+            MainGeneratorApp.main(args);
+        } catch (IOException e) {
+            fail();
+        }
     }
 }

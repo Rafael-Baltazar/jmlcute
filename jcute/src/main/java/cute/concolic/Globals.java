@@ -81,7 +81,6 @@ public class Globals {
         IntHolder depth = new IntHolder(0);
         parser.addOption("-d %d #Depth of search. Default is 0, which implies infinite depth",depth);
         IntHolder seed = new IntHolder((int)System.currentTimeMillis());
-        //IntHolder seed = new IntHolder(34526);
         parser.addOption("-s %d #Seed for random number generator in case -r " +
                 "option is given. Default is current system time.",seed);
         IntHolder debugLevel = new IntHolder(0);
@@ -122,10 +121,10 @@ public class Globals {
         }
         //System.out.println("arg = "+arg);
         String[] args2 = null;
-        if(!arg.equals("")){
-            args2 = arg.split(":");
-        } else {
+        if(arg.equals("")){
             args2 = new String[0];
+        } else {
+            args2 = arg.split(":");
         }
         parser.matchAllArgs(args2);
 
@@ -154,7 +153,6 @@ public class Globals {
         logger = new Logger(information,new PrintWriter(System.out));
         junitTest = new JUnitTestGenerator(information);
         ptrace = new ExecutionLog(logger,information);
-
         try {
             ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream("cuteSymbolTable")));
             try {
@@ -194,5 +192,4 @@ public class Globals {
         information.nThreads = 1;
 
     }
-
 }

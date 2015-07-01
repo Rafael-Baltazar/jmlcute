@@ -34,4 +34,7 @@ public class Information {
         suddenExit = false;
     }
 
+    public boolean isReturnVal(int exitCode) {
+        return (returnVal & exitCode) == exitCode;
+    }
 }

@@ -25,30 +25,35 @@ public class MainGeneratorTest extends TestCase {
     }
 
     /**
-     * Test App with a public method app and several non-public non-instance methods.
+     * Test samplePackageName with a public method app and several non-public non-instance methods.
      */
     public void testApp() {
         MainGenerator mainGenerator = new MainGenerator();
-        StringBuilder[] stringBuilders = new StringBuilder[0];
+        MainClass[] mainClasses = new MainClass[0];
         try {
-            stringBuilders = mainGenerator.generate("App.App");
+            mainClasses = mainGenerator.generate("samplePackageName.SampleClassName");
         } catch (ClassNotFoundException e) {
-            fail("App.App was not found.");
+            fail("samplePackageName.SampleClassName was not found.");
         }
-        assertTrue("stringBuilders is of incorrect size.", stringBuilders
-                .length == 1);
+        assertTrue("mainClasses is of incorrect size.", mainClasses.length == 1);
+        String directoryName = mainClasses[0].getDirectoryName();
+        assertTrue("Directory name is incorrect.", directoryName.equals("samplePackageName"));
+        String fileName = mainClasses[0].getFileName();
+        assertTrue("File name is incorrect.", fileName
+                .equals("jmlcute__samplePackageName__SampleClassName__app_samplePackageName__SampleClassName_samplePackageName__SampleClassName.java"));
         StringBuilder sb = new StringBuilder();
-        sb.append("package App;\n");
+        sb.append("package samplePackageName;\n");
         sb.append("\n");
-        sb.append("public class jmlcute__App__App__app_App__App_App__App {\n");
+        sb.append("public class jmlcute__samplePackageName__SampleClassName__app_samplePackageName__SampleClassName_samplePackageName__SampleClassName {\n");
         sb.append("  public static void main(String[] args) {\n");
-        sb.append("    App.App receiver = cute.Cute.input.Object(\"App.App\");\n");
+        sb.append("    samplePackageName.SampleClassName receiver = (samplePackageName.SampleClassName) cute.Cute.input.Object(\"samplePackageName.SampleClassName\");\n");
         sb.append("    cute.Cute.Assume(receiver != null);\n");
-        sb.append("    App.App arg0 = cute.Cute.input.Object(\"App.App\");\n");
-        sb.append("    App.App arg1 = cute.Cute.input.Object(\"App.App\");\n");
+        sb.append("    samplePackageName.SampleClassName arg0 = (samplePackageName.SampleClassName) cute.Cute.input.Object(\"samplePackageName.SampleClassName\");\n");
+        sb.append("    samplePackageName.SampleClassName arg1 = (samplePackageName.SampleClassName) cute.Cute.input.Object(\"samplePackageName.SampleClassName\");\n");
         sb.append("    receiver.app(arg0, arg1);\n");
         sb.append("  }\n");
         sb.append("}\n");
-        assertTrue("StringBuilders[0] is incorrect.", sb.toString().equals(stringBuilders[0].toString()));
+        assertTrue("The MainClass is incorrect.", sb.toString().equals(
+                mainClasses[0].getJavaFile().toString()));
     }
 }

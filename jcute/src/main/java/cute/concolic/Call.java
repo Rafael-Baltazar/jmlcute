@@ -72,8 +72,6 @@ public class Call {
 
     public static int getLockDepth(Object l){
         int ldepth = Globals.globals.sched.getLockDepth(l);
-//        System.out.println("ldepth = " + ldepth);
-//        System.out.flush();
         return ldepth;
     }
 

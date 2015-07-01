@@ -54,10 +54,6 @@ public class InstrumentInvokeStatement {
 
                 Stmt sinc = Jimple.v().newAssignStmt(tmpLocal2,Jimple.v().newAddExpr(tmpLocal2,IntConstant.v(1)));
                 units.insertAfter(Jimple.v().newIfStmt(Jimple.v().newLtExpr(tmpLocal2,tmpLocal),sinc),s);
-//                mr = Scene.v().getMethod("<cute.concolic.Call: void printStr(java.lang.String)>").makeRef();
-//                units.insertAfter(
-//                        Jimple.v().newInvokeStmt(Jimple.v().newStaticInvokeExpr(
-//                                mr,StringConstant.v("Crossed"))),s);
                 units.insertAfter(Jimple.v().newExitMonitorStmt(((InstanceInvokeExpr)right).getBase()),s);
                 units.insertAfter(sinc,s);
                 units.insertAfter(Jimple.v().newAssignStmt(tmpLocal2,IntConstant.v(0)),s);
@@ -65,11 +61,9 @@ public class InstrumentInvokeStatement {
             else if(right.getArgCount()==0 && name.equals("notify")){
                 AddCallWithObject.instrument(((InstanceInvokeExpr)right).getBase(),
                         units,s,"notifyBefore",true,lineNo);
-//                        addCallWithObject(((InstanceInvokeExpr)right).getBase(),units,s,"notifyAfter",false);
             } else if(right.getArgCount()==0 && name.equals("notifyAll")){
                 AddCallWithObject.instrument(((InstanceInvokeExpr)right).getBase(),
                         units,s,"notifyAllBefore",true,lineNo);
-//                        addCallWithObject(((InstanceInvokeExpr)right).getBase(),units,s,"notifyAllAfter",false);
             }
             else if(right.getArgCount()==0 && name.equals("start") && right instanceof InstanceInvokeExpr
                     && Utils.isThreadSubType(((InstanceInvokeExpr)right).getMethod().getDeclaringClass())){
@@ -85,7 +79,5 @@ public class InstrumentInvokeStatement {
         } else {
             ParseExpr.instrument(body,right,null,units,s,st,isConcurrent,lineNo,false);
         }
-
     }
-
 }
