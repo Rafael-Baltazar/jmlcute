@@ -178,18 +178,12 @@ public class Globals {
         coverage = new BranchCoverageLog(information);
         coverage.read();
 
-
         input = new InputMap(information,logger,junitTest,state,ptrace,st,rand);
         input.read();
-
         cstack = new ComputationStacks(state,path,history,coverage,input);
-
         solver = new GenerateInputAndSchedule(information,input,path,history,ptrace,logger,junitTest,rand,coverage);
-
         sched = new Scheduler(information,path,state,history,rand,solver);
-
         information.brackTrackAt = -1;
         information.nThreads = 1;
-
     }
 }

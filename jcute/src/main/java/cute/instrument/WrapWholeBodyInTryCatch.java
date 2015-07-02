@@ -34,7 +34,5 @@ public class WrapWholeBodyInTryCatch {
             body.getUnits().addLast(Jimple.v().newInvokeStmt(Jimple.v().newStaticInvokeExpr(mr,IntConstant.v(-1))));
         }
         body.getUnits().addLast(Jimple.v().newThrowStmt(tmpLocal));
-
     }
-
 }

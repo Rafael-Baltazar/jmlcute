@@ -5,7 +5,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
- * Unit test for simple MainGeneratorApp.
+ * Unit test for simple TestCaseGeneratorApp.
  */
 public class MainGeneratorTest extends TestCase {
     /**

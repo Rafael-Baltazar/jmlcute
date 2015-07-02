@@ -18,8 +18,6 @@ public class Scheduler extends Thread {
     public Semaphore semaphore = new Semaphore();
     public Semaphore blocker = new Semaphore(1);
     public Semaphore waitNotifySemaphore = new Semaphore(1);
-
-
     public IdentityHashMap numbersNotified = new IdentityHashMap();
 
     // maps thread to thread to thread id (Thread -> Integer)
@@ -120,10 +118,6 @@ public class Scheduler extends Thread {
                             if(reportRace){
                                 information.returnVal = Cute.EXIT_RACE;
                                 rl = new RaceLog(vinfoa.getIndex(),path.size()-1);
-//                                ExecutionLog.printRace(vinfoa.getIndex(),path.size()-1);
-//                                System.err.println("Possible data race between "
-//                                        +vinfoa.getIndex()+" and "
-//                                        +(path.size()-1));
                             }
                         }
                     }
@@ -172,7 +166,6 @@ public class Scheduler extends Thread {
         threadToVarInfo.put(thisTid,vinfoa);
         return rp;
     }
-
 
     public void startBefore(Thread child){
         blocker.acquire();
@@ -353,12 +346,9 @@ public class Scheduler extends Thread {
     public void run() {
         while(true){
             semaphore.acquire();
-
             Thread.yield();
-
             blocker.acquire();
             assert numbersNotified.size()<=1;
-
             if(numbersNotified.size()==1){
                 Object l = numbersNotified.keySet().toArray()[0];
                 Integer N = (Integer)numbersNotified.get(l);
@@ -374,9 +364,6 @@ public class Scheduler extends Thread {
                     }
                 }
             }
-//
-//
-//            blocker.acquire();
             scheduleNext();
             blocker.release();
         }

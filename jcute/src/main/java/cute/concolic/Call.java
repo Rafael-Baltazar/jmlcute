@@ -39,8 +39,6 @@ public class Call {
             StringWriter strOut = new StringWriter();
             e.printStackTrace(new PrintWriter(strOut));
             String error = strOut.toString();
-            System.err.println("Error in "+Thread.currentThread()+" "+e.getCause());
-            System.err.println(error);
             Globals.globals.ptrace.writeError(error);
             Globals.globals.information.returnVal = Cute.EXIT_ERROR+Globals.globals.information.returnVal;
             Globals.globals.solver.predict();
