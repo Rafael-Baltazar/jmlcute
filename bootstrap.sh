@@ -8,7 +8,7 @@ echo "cd /vagrant/" >> .bashrc
 sudo apt-get update -y
 sudo apt-get install -y dos2unix unzip tar vim
 cd /vagrant/
-chmod +x debugJMLCute
+chmod +x runjmlCute
 echo "Setup Complete"
-echo "Try running ./debugJMLCute"
+echo "Try running ./runjmlCute pt.ulisboa.tecnico TestDoubleRecursion"
 

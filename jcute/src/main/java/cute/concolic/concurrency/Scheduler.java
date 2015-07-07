@@ -554,7 +554,6 @@ public class Scheduler extends Thread {
             }
 
             if(!scheduled){
-                System.err.println("************************ Deadlock found ****************************");
                 pe.setThreadId(threadId);
                 information.returnVal += Cute.EXIT_DEADLOCK;
                 solver.predict();

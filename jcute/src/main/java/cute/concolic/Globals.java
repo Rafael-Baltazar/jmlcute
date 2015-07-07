@@ -90,10 +90,10 @@ public class Globals {
                 "\t4 print input map after reading from disk.\n" +
                 "\t8 print history at every history change.\n" +
                 "\t16 print symbolic state at every state change.\n" +
-                "\t32 print path contraint whenever path constraint is updated.\n" +
+                "\t32 print path constraint whenever path constraint is updated.\n" +
                 "\t64 print old and new history at the end of execution.\n" +
                 "\t128 print old and new input map at the end of the execution.\n" +
-                "\t256 print path constraint at the end of the excution.\n" +
+                "\t256 print path constraint at the end of the execution.\n" +
                 "\t512 print line number executed.",debugLevel);
         IntHolder mode = new IntHolder(0);
         parser.addOption("-m %d {0,1,2} #\n\t0 - next path (depends on history), " +
@@ -106,7 +106,7 @@ public class Globals {
         parser.addOption("-p %d {1,2,3,4} #search strategy to be invoked: " +
                 "1 (default) is DFS, 2 is random, 3 is quick, 4 is better random",randomSearch);
         BooleanHolder optimalDistributed = new BooleanHolder(false);
-        parser.addOption("-a %v #turn off Optimal Distrubuted Search ",optimalDistributed);
+        parser.addOption("-a %v #turn off Optimal Distributed Search ",optimalDistributed);
         BooleanHolder generateJUnit = new BooleanHolder(true);
         parser.addOption("-j %v #generate JUnit test cases",generateJUnit);
         BooleanHolder printTraceAndInputs = new BooleanHolder(true);
@@ -119,7 +119,6 @@ public class Globals {
         if(arg.startsWith(":")){
             arg = arg.substring(1);
         }
-        //System.out.println("arg = "+arg);
         String[] args2 = null;
         if(arg.equals("")){
             args2 = new String[0];
@@ -127,7 +126,6 @@ public class Globals {
             args2 = arg.split(":");
         }
         parser.matchAllArgs(args2);
-
         this.information.seed = seed.value;
         this.information.depth = depth.value;
         this.information.random = random.value;
@@ -138,9 +136,7 @@ public class Globals {
         this.information.printTraceAndInputs = printTraceAndInputs.value;
         Cute.N = NArg.value;
         this.information.generateJUnit = generateJUnit.value;
-
         initialize();
-
         this.initialized = true;
         this.sched.setPriority(Thread.MIN_PRIORITY);
         //Runtime.getRuntime().addShutdownHook(new SolveOnExit());
@@ -167,17 +163,12 @@ public class Globals {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             System.exit(1);
         }
-
         state = new State(logger,information);
-
         history = new BranchHistory(logger,information);
         history.read();
-
         path = new PathConstraint(logger,information);
-
         coverage = new BranchCoverageLog(information);
         coverage.read();
-
         input = new InputMap(information,logger,junitTest,state,ptrace,st,rand);
         input.read();
         cstack = new ComputationStacks(state,path,history,coverage,input);

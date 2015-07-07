@@ -1,7 +1,7 @@
 package samplePackageName;
 
 public class SampleClassName extends SampleSuperclassName {
-    public SampleClassName app(SampleClassName a, SampleClassName b) {
+    public SampleClassName app(SampleClassName a, int b) {
         System.out.println("app method");
         return a;
     }

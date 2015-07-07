@@ -1,82 +1,47 @@
 #!/bin/bash
-# SRC_PATH and JUNIT_ROOT need to be inside the directory that has the Vagrantfile.
 SRC_PATH=jmlcute-essentials/src/main/java/
-JUNIT_ROOT=jmlcute-essentials/src/test/java/
-LIB_PATH=
-
-#TODO: Enable different packages.
-## Challenge: Removing useless output: aspectjml and soot verbose cannot be disabled.
-JUNIT_PKG=pt.ulisboa.tecnico
-JUNIT_CNAME=$1
-JUNIT_FNAME=main
-
-USE_JMLCUTE=$2
+USE_JMLCUTE=$1
+CUTE_ARGS="-p:1"
 
 # Prepare
-TARGET_DIR=target
-CLASSES_DIR=main/java/
+TARGET_DIR=target/
+CLASSES_DIR=classes/
+GENERATED_SOURCES_DIR=generated-sources/
+GENERATED_TEST_SOURCES_DIR=generated-test-sources/
 rm -rf $TARGET_DIR
-mkdir $TARGET_DIR
-mkdir -p $TARGET_DIR/$CLASSES_DIR
+mkdir -p $TARGET_DIR
 cd $TARGET_DIR
+mkdir -p $CLASSES_DIR
+mkdir -p $GENERATED_SOURCES_DIR
+mkdir -p $GENERATED_TEST_SOURCES_DIR
 
 TARGET_DIR=.
 SRC_PATH=../$SRC_PATH
-JUNIT_ROOT=../$JUNIT_ROOT
-LIB_PATH=../$LIB_PATH
 JMLCUTE_JAR=../jmlcute.jar
 SOOT_JAR=../lib-jcute/sootclasses-2.2.3.jar
+JMLCUTE_PROCESSED_CLASSES_JAR=jmlcute-processed-classes.jar
 export JAVA_LIB_PATH=..
 export LD_LIBRARY_PATH=..
 PATH=$PATH:..
 
 JAVA_FILES=$(find $SRC_PATH -name "*.java" | tr "\n" " ")
 
-JUNIT_DIR=$JUNIT_ROOT/$(echo "$JUNIT_PKG" | tr "." "/")
-mkdir -p $JUNIT_DIR
-
-if [[ $USE_JMLCUTE == "-jcute" ]]
+if [[ $USE_JMLCUTE == "-no-jml" ]]
 then
+  shift
   # Compile
-  export CLASSPATH=$JMLCUTE_JAR
-  javac -d $CLASSES_DIR -sourcepath $SRC_PATH $JAVA_FILES
+  export CLASSPATH=$JMLCUTE_JAR:$SRC_PATH
+  javac -d $CLASSES_DIR $JAVA_FILES
 else
-  # Print and Weave Aspects
+  # Print and Weave Aspects.
   export CLASSPATH=$JMLCUTE_JAR
-  java org.jmlspecs.ajmlrac.Main --destination $CLASSES_DIR --sourcepath $SRC_PATH --classpath $CLASSPATH --source=1.7 --crosscuttingContractSpecifications --adviceChecking --defaultNonNull --mustBeExecutable --ajWeaver ajc -P $JAVA_FILES
+  java org.jmlspecs.ajmlrac.Main --destination $CLASSES_DIR --sourcepath $SRC_PATH --classpath $CLASSPATH --source=1.7 --crosscuttingContractSpecifications --adviceChecking --defaultNonNull --mustBeExecutable --Quiet --ajWeaver ajc -P $JAVA_FILES
   export CLASSPATH=$JMLCUTE_JAR
   java org.aspectj.tools.ajc.Main -source 1.7 -d $CLASSES_DIR $JAVA_FILES $CLASSES_DIR/*.aj
 fi
 
-# Instrumenting
+# Generate Test Cases
 # Changing the order in the CLASSPATH will break the script, because different versions of Soot are in both jcute and abc compiler.
 export CLASSPATH=$CLASSES_DIR:$SOOT_JAR:$JMLCUTE_JAR
-java -Xmx900m -Dcute.sequential=true cute.instrument.CuteInstrumenter -keep-line-number -d $CLASSES_DIR -x cute -x lpsolve --app $JUNIT_PKG.$JUNIT_CNAME
-
-# Execute concollicaly and generate test case ITER times.
-ITER=10
-CUTE_ARGS=-p:1:-m:2
-VM_ARGS="-Xmx512m -Xms512m"
-for i in $(seq 1 "$ITER")
-do
-  echo "[Execution Path $i]"
-  export CLASSPATH=$CLASSES_DIR:$JMLCUTE_JAR
-  java $VM_ARGS -Djava.library.path=$JAVA_LIB_PATH -Dcute.args="$CUTE_ARGS" $JUNIT_PKG.$JUNIT_CNAME
-  RET2="$(($?&2))"
-  CUTE_ARGS=-p:1
-
-  JUNIT_RUNCOUNT=$i
-  JUNIT_LAST_DIR=. # The directory that contains the current junitInputFile.
-  export CLASSPATH=$CLASSES_DIR:$JMLCUTE_JAR
-  java $VM_ARGS cute.concolic.logging.JUnitTestGenerator $JUNIT_DIR $JUNIT_PKG $JUNIT_CNAME $JUNIT_RUNCOUNT
-  if [[ ("$RET2" -eq "2") ]]
-  then
-   break
-  fi
-done
-
-# Report Branch Coverage
-COVERAGE_LOG_DIR=.
-export CLASSPATH=$JMLCUTE_JAR
-java cute.concolic.logging.BranchCoverageLog $COVERAGE_LOG_DIR
+java -Xmx900m -Djava.library.path="$JAVA_LIB_PATH" -Dcute.sequential=true -Dcute.args="$CUTE_ARGS" pt.ulisboa.tecnico.TestCaseGeneratorApp -main-generate-d $GENERATED_SOURCES_DIR -main-compile-d $CLASSES_DIR -main-instrument-jar $JMLCUTE_PROCESSED_CLASSES_JAR -test-cases-d $GENERATED_TEST_SOURCES_DIR $@
 

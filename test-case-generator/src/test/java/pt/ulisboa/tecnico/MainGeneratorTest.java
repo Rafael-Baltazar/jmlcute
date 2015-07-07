@@ -40,16 +40,16 @@ public class MainGeneratorTest extends TestCase {
         assertTrue("Directory name is incorrect.", directoryName.equals("samplePackageName"));
         String fileName = mainClasses[0].getFileName();
         assertTrue("File name is incorrect.", fileName
-                .equals("jmlcute__samplePackageName__SampleClassName__app_samplePackageName__SampleClassName_samplePackageName__SampleClassName.java"));
+                .equals("jmlcute__samplePackageName__SampleClassName__app_samplePackageName__SampleClassName_int.java"));
         StringBuilder sb = new StringBuilder();
         sb.append("package samplePackageName;\n");
         sb.append("\n");
-        sb.append("public class jmlcute__samplePackageName__SampleClassName__app_samplePackageName__SampleClassName_samplePackageName__SampleClassName {\n");
+        sb.append("public class jmlcute__samplePackageName__SampleClassName__app_samplePackageName__SampleClassName_int {\n");
         sb.append("  public static void main(String[] args) {\n");
         sb.append("    samplePackageName.SampleClassName receiver = (samplePackageName.SampleClassName) cute.Cute.input.Object(\"samplePackageName.SampleClassName\");\n");
         sb.append("    cute.Cute.Assume(receiver != null);\n");
         sb.append("    samplePackageName.SampleClassName arg0 = (samplePackageName.SampleClassName) cute.Cute.input.Object(\"samplePackageName.SampleClassName\");\n");
-        sb.append("    samplePackageName.SampleClassName arg1 = (samplePackageName.SampleClassName) cute.Cute.input.Object(\"samplePackageName.SampleClassName\");\n");
+        sb.append("    int arg1 = (int) cute.Cute.input.Integer();\n");
         sb.append("    receiver.app(arg0, arg1);\n");
         sb.append("  }\n");
         sb.append("}\n");

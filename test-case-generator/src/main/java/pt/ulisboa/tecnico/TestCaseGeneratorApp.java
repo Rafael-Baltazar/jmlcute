@@ -1,29 +1,25 @@
 package pt.ulisboa.tecnico;
 
 import cute.Cute;
-import cute.concolic.Globals;
 import cute.concolic.logging.BranchCoverageLog;
+import cute.concolic.logging.JUnitTestGenerator;
 
 import javax.tools.*;
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * Main entry for MainGenerator.
+ * Main entry for generating test cases.
  */
 public class TestCaseGeneratorApp {
     private String mainGenDestFolder = "generated-sources";
     private String mainCompileDestFolder = "classes";
-    private String mainInstrDestFolder = "classes";
     private String mainInstrDestJar = "jmlcute-processed-classes.jar";
     private String testCasesDestFolder = "generated-test-sources";
-    private int concolicIterations = 3;
+    private int concolicIterations = 10;
+    private boolean resetSearch = true;
+    private boolean forceCreation = true;
 
     public String getMainGenDestFolder() {
         return mainGenDestFolder;
@@ -31,10 +27,6 @@ public class TestCaseGeneratorApp {
 
     public String getMainCompileDestFolder() {
         return mainCompileDestFolder;
-    }
-
-    public String getMainInstrDestFolder() {
-        return mainInstrDestFolder;
     }
 
     public String getMainInstrDestJar() {
@@ -45,8 +37,17 @@ public class TestCaseGeneratorApp {
         return testCasesDestFolder;
     }
 
+    public String getClasspath() {
+        return System.getProperty("java.class.path");
+    }
+
     public int getConcolicIterations() {
         return concolicIterations;
+    }
+
+    public void resetConcolicExecution() {
+        resetSearch = true;
+        forceCreation = true;
     }
 
     /**
@@ -77,24 +78,21 @@ public class TestCaseGeneratorApp {
             }
             mainClass:
             for (MainClass mainClass : mainClasses) {
-                boolean compiled = app.compileMainClass(compiler, diagnostics,
-                        fileManager, mainClass);
+                final boolean compiled = app.compileMainClass(compiler,
+                        diagnostics, fileManager, mainClass);
                 if (!compiled) {
                     break;
                 }
                 app.instrumentMain(mainClass);
-                for (int j = 0; j < app.getConcolicIterations(); j++) {
-                    Globals.globals = new Globals();
-                    try {
-                        boolean run = app.runMain(mainClass);
-                        if (!run) {
-                            continue mainClass;
-                        }
-                    } catch (InvocationTargetException e) {
-                        System.err.println(e.getCause().toString());
+                app.resetConcolicExecution();
+                for (int testId = 1, j = 0;
+                     j < app.getConcolicIterations(); j++) {
+                    int exit = app.runMain(mainClass);
+                    if (exit == -1) {
+                        break mainClass;
                     }
-                    if (Globals.globals.information.isReturnVal(Cute.
-                            EXIT_COMPLETE)) {
+                    app.generateJUnitTestCase(mainClass, testId++, exit);
+                    if (app.isExitState(exit, Cute.EXIT_COMPLETE)) {
                         break;
                     }
                 }
@@ -141,14 +139,6 @@ public class TestCaseGeneratorApp {
                 } else {
                     mainCompileDestFolder = args[++i];
                 }
-            } else if (args[i].equals("-main-instrument-d")) {
-                if (i + 1 >= args.length) {
-                    System.err.println("No destination folder was specified " +
-                            "after -main-instrument-d.");
-                    return -1;
-                } else {
-                    mainInstrDestFolder = args[++i];
-                }
             } else if (args[i].equals("-main-instrument-jar")) {
                 if (i + 1 >= args.length) {
                     System.err.println("No jar name was specified after " +
@@ -181,6 +171,8 @@ public class TestCaseGeneratorApp {
     }
 
     /**
+     * Writes mainClass to a .java file, and compiles it to a .class file.
+     *
      * @param compiler    the JavaCompiler.
      * @param diagnostics the DiagnosticCollector.
      * @param fileManager the JavaFileManager.
@@ -188,11 +180,11 @@ public class TestCaseGeneratorApp {
      * @return true, if mainClass was compiled. Otherwise, false.
      * @throws IOException
      */
-    private boolean compileMainClass(JavaCompiler compiler,
-                                     DiagnosticCollector<JavaFileObject>
-                                             diagnostics,
-                                     StandardJavaFileManager fileManager,
-                                     MainClass mainClass) throws IOException {
+    private boolean compileMainClass(
+            JavaCompiler compiler,
+            DiagnosticCollector<JavaFileObject> diagnostics,
+            StandardJavaFileManager fileManager,
+            MainClass mainClass) throws IOException {
         final File f = new File(getMainGenDestFolder() + "/" + mainClass
                 .getDirectoryName(), mainClass.getFileName());
         if (f.exists()) {
@@ -207,7 +199,7 @@ public class TestCaseGeneratorApp {
         writer.close();
         final Collection<String> options = new ArrayList<String>();
         options.add("-classpath");
-        options.add(System.getProperty("java.class.path"));
+        options.add(getClasspath());
         options.add("-d");
         options.add(getMainCompileDestFolder());
         final Iterable<? extends JavaFileObject> compilationUnits = fileManager
@@ -217,7 +209,7 @@ public class TestCaseGeneratorApp {
         if (compiled) {
             return true;
         } else {
-            System.err.println("The generated classes have errors. Something " +
+            System.err.println("The generated class has errors. Something " +
                     "terribly wrong has happened.");
             for (Diagnostic diagnostic : diagnostics.getDiagnostics()) {
                 System.err.println(diagnostic);
@@ -233,47 +225,156 @@ public class TestCaseGeneratorApp {
      */
     private void instrumentMain(MainClass mainClass) throws IOException {
         final ProcessBuilder pb = new ProcessBuilder("java",
-                "-cp", System.getProperty("java.class.path"),
-                "-Dcute.sequential=true",
+                "-cp", getClasspath(),
+                "-Dcute.sequential=" + System.getProperty("cute.sequential"),
                 "cute.instrument.CuteInstrumenter",
                 "-keep-line-number",
-                "-d", getMainInstrDestFolder() + "/" + getMainInstrDestJar(),
+                "-d", getMainInstrDestJar(),
                 "-outjar",
                 "-x", "cute", "-x", "lpsolve",
                 "--app", mainClass.getFullyQualifiedName());
         final Process process = pb.start();
-        BufferedReader br = new BufferedReader(new InputStreamReader(
-                process.getInputStream()));
-        String line;
-        while ((line = br.readLine()) != null) {
-            System.err.println(line);
+        final Thread input, error;
+        (input = new Thread(new Runnable() {
+            public void run() {
+                final BufferedReader br = new BufferedReader(
+                        new InputStreamReader(process.getInputStream()));
+                String line;
+                try {
+                    while ((line = br.readLine()) != null) {
+                        System.err.println(line);
+                    }
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        })).start();
+        (error = new Thread(new Runnable() {
+            public void run() {
+                final BufferedReader br = new BufferedReader(
+                        new InputStreamReader(process.getErrorStream()));
+                String line;
+                try {
+                    while ((line = br.readLine()) != null) {
+                        System.err.println(line);
+                    }
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        })).start();
+        try {
+            input.join();
+            error.join();
+            process.waitFor();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
     /**
+     * Calls the instrumented mainClass in a different process.
+     *
      * @param mainClass the MainClass to run.
-     * @return true, if mainClass was run. Otherwise, false.
+     * @return -1, if there was an error. Otherwise, the exit code of the
+     * process.
      */
-    private boolean runMain(MainClass mainClass) throws InvocationTargetException {
-        final File f = new File(getMainInstrDestFolder(), getMainInstrDestJar());
+    private int runMain(MainClass mainClass) throws IOException {
+        int exit;
+        final ProcessBuilder pb = new ProcessBuilder("java",
+                "-cp", getMainInstrDestJar() + ":" + getClasspath(),
+                "-Djava.library.path=" + System.getProperty("java.library.path"),
+                "-Dcute.args=" + System.getProperty("cute.args") + (resetSearch
+                        ? ":-m:2" : ""),
+                mainClass.getFullyQualifiedName());
+        final Process process = pb.start();
+        final Thread input, error;
+        (input = new Thread(new Runnable() {
+            public void run() {
+                final BufferedReader brInput = new BufferedReader(
+                        new InputStreamReader(process.getInputStream()));
+                String line;
+                try {
+                    while ((line = brInput.readLine()) != null) {
+                        System.out.println(line);
+                    }
+                    brInput.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        })).start();
+        (error = new Thread(new Runnable() {
+            public void run() {
+                final BufferedReader brError = new BufferedReader(
+                        new InputStreamReader(process.getErrorStream()));
+                String line;
+                try {
+                    while ((line = brError.readLine()) != null) {
+                        System.err.println(line);
+                    }
+                    brError.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        })).start();
         try {
-            final URLClassLoader classLoader = new URLClassLoader(new URL[]{
-                    f.toURI().toURL()}, this.getClass().getClassLoader());
-            final Class clazz = Class.forName(mainClass.getFullyQualifiedName(),
-                    true, classLoader);
-            final Method m = clazz.getDeclaredMethod("main", String[].class);
-            final String[] params = null;
-            m.invoke(null, (Object) params);
-            return true;
-        } catch (NoSuchMethodException e) {
+            input.join();
+            error.join();
+            exit = process.waitFor();
+        } catch (InterruptedException e) {
             e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            exit = -1;
         }
-        return false;
+        if (exit != -1) {
+            resetSearch = false;
+        }
+        return exit;
+    }
+
+    /**
+     * Checks whether exit has the Cute state state.
+     *
+     * @param exit  the exit code to check.
+     * @param state the state to check.
+     * @return true, if the exit code has the state state. Otherwise, false.
+     */
+    private boolean isExitState(int exit, int state) {
+        return (exit & state) == state;
+    }
+
+    /**
+     * Generates the test case resulting from the last concolic execution, if
+     * the test case increases coverage and does not violate an assumption.
+     *
+     * @param mainClass the MainClass to generate test cases for.
+     * @param testId    the id of the test case that will be part of the name
+     *                  of the test case method.
+     * @param exit      the exit code of the previous concolic execution.
+     * @return true, if the test case was generated. Otherwise, false.
+     */
+    private boolean generateJUnitTestCase(MainClass mainClass, int testId,
+                                          int exit) {
+        if (isExitState(exit, Cute.EXIT_ASSUME_FAILED) || !isExitState(exit,
+                Cute.EXIT_COVERAGE_INCREASED)) {
+            return false;
+        }
+        final String fullName = mainClass.getFullyQualifiedName();
+        final String pack = fullName.substring(0, fullName.lastIndexOf('.'));
+        final String name = fullName.substring(fullName.lastIndexOf('.') + 1);
+        String comment = "";
+        if (isExitState(exit, Cute.EXIT_ASSERT_FAILED)) {
+            comment = "This test case causes a specification violation.";
+        }
+        JUnitTestGenerator.setForceCreation(forceCreation);
+        boolean appended = JUnitTestGenerator.appendToJunitTestCase(
+                getTestCasesDestFolder(), pack, name, testId, comment);
+        if (appended) {
+            forceCreation = false;
+        }
+        return appended;
     }
 }

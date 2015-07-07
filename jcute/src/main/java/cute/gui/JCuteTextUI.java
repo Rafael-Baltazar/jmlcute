@@ -364,7 +364,7 @@ public class JCuteTextUI implements ProcessOwner{
                 }
                 JUnitTestGenerator.appendToJunitTestCase(
                         getOptionJUnitOutputFolderName(),getOptionJUnitPkgName(),
-                        mainClassName, x,f);
+                        mainClassName, x,f,"");
             }
         }
     }
@@ -456,7 +456,7 @@ public class JCuteTextUI implements ProcessOwner{
                 if(isOptionGenerateJUnit() && flag){
                     JUnitTestGenerator.appendToJunitTestCase(
                             getOptionJUnitOutputFolderName(),getOptionJUnitPkgName(),
-                            mainClassName, runCount,tmpLastFile);
+                            mainClassName, runCount,tmpLastFile,"");
                 }
             }
             if(!isCanceled && (getOptionLogLevel() ==LOG_ALL ||

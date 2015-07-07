@@ -1,16 +1,12 @@
 package pt.ulisboa.tecnico;
 
-import pt.ulisboa.tecnico.internal.FibImpl;
+import cute.Cute;
 
 public class TestDoubleRecursion {
     public static void main(String[] args) {
-        try {
-            int n = cute.Cute.input.Integer();
-            cute.Cute.Assume(n >= 0 && n < 5);
-            Fib f = new FibImpl();
-            f.get(n);
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
+        pt.ulisboa.tecnico.internal.FibImpl receiver = (pt.ulisboa.tecnico.internal.FibImpl) Cute.input.Object("pt.ulisboa.tecnico.internal.FibImpl");
+        cute.Cute.Assume(receiver != null);
+        int arg0 = cute.Cute.input.Integer();
+        receiver.get(arg0);
     }
 }

@@ -424,7 +424,6 @@ public class Call {
         System.out.flush();
     }
 
-
     public static void waitAfter(Object l,int lineno){
         printDebugBefore("waitAfter 1",true);
         printDebugAfter(">waitAfter 1",System.identityHashCode(l),true,"");

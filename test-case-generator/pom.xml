@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>pt.ulisboa.tecnico</groupId>
-  <artifactId>main-generator</artifactId>
+  <artifactId>test-case-generator</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 

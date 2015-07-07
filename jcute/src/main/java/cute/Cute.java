@@ -14,11 +14,14 @@ import junit.framework.AssertionFailedError;
 
 public class Cute {
     public static int N;
+    //1 is reserved for errors.
     public static final int EXIT_COMPLETE = 2;
-    public static final int EXIT_ASSERT_FAILED = 32;
-    public static final int EXIT_ERROR = 8;
     public static final int EXIT_RACE = 4;
+    public static final int EXIT_ERROR = 8;
     public static final int EXIT_DEADLOCK = 16;
+    public static final int EXIT_ASSERT_FAILED = 32;
+    public static final int EXIT_ASSUME_FAILED = 64;
+    public static final int EXIT_COVERAGE_INCREASED = 128;
 
     public static Input input = new InputImpl();
 
@@ -32,26 +35,22 @@ public class Cute {
                 if (Globals.globals.information.brackTrackAt < 0) {
                     Globals.globals.information.brackTrackAt = Globals.globals.path.size() - 1;
                 }
+                Globals.globals.information.returnVal += Cute.EXIT_ASSUME_FAILED;
+                Thread.currentThread().stop();
+            } else {
+                System.exit(0);
             }
-            throw new AssumeFailedError();
         }
     }
 
     public static void Assert(boolean b) {
         if (!b) {
             if (Globals.globals.initialized) {
-                Globals.globals.information.returnVal = Cute.EXIT_ASSERT_FAILED + Globals.globals.information.returnVal;
+                Globals.globals.information.returnVal += Cute.EXIT_ASSERT_FAILED;
                 Globals.globals.solver.predict();
+            } else {
+                throw new AssertionFailedError();
             }
-            throw new AssertFailedError();
         }
     }
-}
-
-/**
- * AssertionFailedError is a subclass of Error. Assuming assumptions and
- * assertions are equivalent in this matter, AssumeFailedError is also an
- * Error.
- */
-class AssumeFailedError extends Error {
 }

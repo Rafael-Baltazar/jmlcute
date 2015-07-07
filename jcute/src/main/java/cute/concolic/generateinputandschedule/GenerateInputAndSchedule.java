@@ -124,7 +124,6 @@ public class GenerateInputAndSchedule {
             }
             if (i <= -1) {
                 writeHistoryAndInput(i);
-                System.out.println("*************************** One complete search is over ************************");
                 (new File(Globals.NEW + "Branches")).delete();
                 (new File(Globals.NEW + "Inputs")).delete();
                 (new File(Globals.NEW + "Counter")).delete();
@@ -316,7 +315,6 @@ public class GenerateInputAndSchedule {
         k = indices.size();
         if (k == 0) {
             writeHistoryAndInput(-1);
-            System.out.println("******************** One complete search is over *********************");
             return;
         }
 
@@ -368,7 +366,6 @@ public class GenerateInputAndSchedule {
     }
 
     synchronized public void predict() {
-        //history.print();
         if (information.mode != Globals.REPLAY_MODE) {
             if (!information.solved) {
                 information.solved = true;
@@ -394,7 +391,9 @@ public class GenerateInputAndSchedule {
         }
         if (coverage.isIncremented()) {
             junitTest.printAll();
+            information.returnVal += Cute.EXIT_COVERAGE_INCREASED;
         }
         ptrace.write();
+        System.exit(information.returnVal);
     }
 }

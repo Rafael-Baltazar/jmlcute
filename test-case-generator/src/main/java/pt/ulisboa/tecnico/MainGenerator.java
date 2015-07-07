@@ -5,12 +5,27 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Generates java files for each of the methods of the class under test. Each of the java files will
  */
 public class MainGenerator {
     private Indentation indentation;
+    private final Map<String, String> inputTypes;
+
+    public MainGenerator() {
+        inputTypes = new TreeMap<String, String>();
+        inputTypes.put("boolean", "Boolean()");
+        inputTypes.put("short", "Short()");
+        inputTypes.put("int", "Integer()");
+        inputTypes.put("long", "Long()");
+        inputTypes.put("float", "Float()");
+        inputTypes.put("double", "Double()");
+        inputTypes.put("char", "Character()");
+        inputTypes.put("byte", "Byte()");
+    }
 
     /**
      * Generates a java file for each of the public instance (non-static)
@@ -30,21 +45,18 @@ public class MainGenerator {
                 final String methodName = method.getName(),
                         fileName = appendJavaClassName(fullyQualifiedName,
                                 methodName, parameterTypes, new StringBuilder())
-                                .append(".java").toString();
-                final StringBuilder sb = generateMethod(fullyQualifiedName,
-                        methodName, parameterTypes),
+                                .append(".java").toString(),
+                        pack = fullyQualifiedName.substring(0,
+                                fullyQualifiedName.lastIndexOf('.'));
+                final StringBuilder javaFile = generateMethod(
+                        fullyQualifiedName, methodName, parameterTypes),
                         directoryName = new StringBuilder(),
                         fullJavaClassName = new StringBuilder();
-                final String[] split = fullyQualifiedName.split("\\.");
-                String sepSlash = "";
-                for (int i = 0; i < split.length - 1; i++) {
-                    directoryName.append(sepSlash).append(split[i]);
-                    fullJavaClassName.append(split[i]).append(".");
-                    sepSlash = "/";
-                }
+                directoryName.append(pack.replaceAll("\\.", "/"));
+                fullJavaClassName.append(pack).append(".");
                 appendJavaClassName(fullyQualifiedName, methodName,
                         parameterTypes, fullJavaClassName);
-                final MainClass mainClass = new MainClass(sb, fileName,
+                final MainClass mainClass = new MainClass(javaFile, fileName,
                         directoryName.toString(), fullJavaClassName.toString());
                 result.add(mainClass);
             }
@@ -95,14 +107,8 @@ public class MainGenerator {
      */
     private StringBuilder appendPackage(String fullyQualifiedClassName,
                                         StringBuilder sb) {
-        sb.append(indentation).append("package ");
-        String[] split = fullyQualifiedClassName.split("\\.");
-        String separator = "";
-        for (int i = 0; i < split.length - 1; i++) {
-            sb.append(separator).append(split[i]);
-            separator = ".";
-        }
-        return sb.append(";\n");
+        final String pack = fullyQualifiedClassName.substring(0, fullyQualifiedClassName.lastIndexOf('.'));
+        return sb.append(indentation).append("package ").append(pack).append(";\n");
     }
 
     /**
@@ -131,13 +137,10 @@ public class MainGenerator {
                                               Type[] parameterTypes,
                                               StringBuilder sb) {
         sb.append("jmlcute__").append(fullyQualifiedClassName
-                .replaceAll("\\.", "__")).append("__").append(methodName)
-                .append("_");
-        String separator = "";
+                .replaceAll("\\.", "__")).append("__").append(methodName);
         for (Type type : parameterTypes) {
             String typeName = ((Class) type).getName().replaceAll("\\.", "__");
-            sb.append(separator).append(typeName);
-            separator = "_";
+            sb.append("_").append(typeName);
         }
         return sb;
     }
@@ -161,10 +164,16 @@ public class MainGenerator {
                 .append("\");\n");
         sb.append(indentation).append("cute.Cute.Assume(receiver != null);\n");
         for (int i = 0; i < parameterTypes.length; i++) {
-            String typeName = ((Class) parameterTypes[i]).getName();
+            final String typeName = ((Class) parameterTypes[i]).getName();
+            String inputType = inputTypes.get(typeName);
             sb.append(indentation).append(typeName).append(" arg").append(i)
-                    .append(" = (").append(typeName).append(") cute.Cute.input.Object(\"")
-                    .append(typeName).append("\");\n");
+                    .append(" = (").append(typeName).append(") cute.Cute.input.");
+            if (inputType == null) {
+                sb.append("Object(\"").append(typeName).append("\")");
+            } else {
+                sb.append(inputType);
+            }
+            sb.append(";\n");
         }
         sb.append(indentation).append("receiver.").append(functionName).append("(");
         String separator = "";
@@ -172,6 +181,7 @@ public class MainGenerator {
             sb.append(separator).append("arg").append(i);
             separator = ", ";
         }
-        return sb.append(");\n");
+        sb.append(");\n");
+        return sb;
     }
 }
