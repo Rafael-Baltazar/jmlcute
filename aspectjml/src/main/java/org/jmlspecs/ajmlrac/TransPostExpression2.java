@@ -180,34 +180,13 @@ public/*@ non_null_by_default */ class TransPostExpression2 extends TransExpress
 		resultStr = resultStr.replace("delegee_"+typeDecl.ident()+"().", "");
 		resultStr = resultStr.replace("this", "object$rac");
 		
-		//RacNode node = tr.wrap(RacParser.parseStatement(type + " " + oldVar + " = " + resultStr + ";"));
-		
 		oldVarDecl.add(TransUtils.toString(type) + " " + oldVar + ";");
-//		int lhs = 0;
-//		int rhs = 0;
-//		
-//		for (int i = 0; i < resultStr.length(); i++) {
-//			char current = resultStr.charAt(i);
-//			if(current == '(')
-//				lhs++;
-//			if(current == ')')
-//				rhs++;
-//		}
-//		
-//		if(lhs < rhs){
-//			resultStr = "("+resultStr;
-//		}
 		oldExprs.add(oldVar + " = " + resultStr + ";");
 
 		// piggy-back the name of new old variable in the name field
 		// of the RAC node; the node will be evaluated by the precondition
 		// check method.
 
-		//node.setVarDecl(PreValueVars.createJmlValueVar(forStatic, oldVar));
-		//oldExprs.add(node);
-
-		//RETURN_RESULT(TransUtils.unwrapObject(type, oldVar + ".value()"));
-		//RETURN_RESULT(oldStmt);
 		RETURN_RESULT(oldVar); // modification due to use of aspects... by Henrique Rebelo
 	}
 

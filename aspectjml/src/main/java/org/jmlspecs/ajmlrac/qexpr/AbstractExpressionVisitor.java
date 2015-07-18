@@ -575,11 +575,10 @@ public abstract class AbstractExpressionVisitor extends RacAbstractVisitor {
 	self.accessor().accept(this);
     }
 
-    /** Visits the given local variable expression,
+    /** Visits the given local variable expression,org.multijava.mjc.Main.processTaskQueue
     * <code>self</code>. By default, this method does nothing. */
     public void visitNameExpression( 
         /*@ non_null @*/ JNameExpression self ) {
-	self.getPrefix().accept(this);
     }
 
    /** Visits the given local variable expression,

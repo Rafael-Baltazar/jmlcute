@@ -1,5 +1,5 @@
 #!/bin/bash
-SRC_PATH=jmlcute-essentials/src/main/java/
+SRC_PATH=example-java/src/main/java/
 USE_JMLCUTE=$1
 CUTE_ARGS="-p:1"
 
@@ -17,31 +17,33 @@ mkdir -p $GENERATED_TEST_SOURCES_DIR
 
 TARGET_DIR=.
 SRC_PATH=../$SRC_PATH
-JMLCUTE_JAR=../jmlcute.jar
-SOOT_JAR=../lib-jcute/sootclasses-2.2.3.jar
 JMLCUTE_PROCESSED_CLASSES_JAR=jmlcute-processed-classes.jar
+JMLCUTE_JARS=../jmlcute.jar:../lib-example/jmlmodelsnonrac.jar
+SOOT_JAR=../lib-jcute/sootclasses-2.2.3.jar
 export JAVA_LIB_PATH=..
 export LD_LIBRARY_PATH=..
 PATH=$PATH:..
 
 JAVA_FILES=$(find $SRC_PATH -name "*.java" | tr "\n" " ")
+JML_FILES=$(find $SRC_PATH -name "*.jml" | tr "\n" " ")
 
 if [[ $USE_JMLCUTE == "-no-jml" ]]
 then
   shift
   # Compile
-  export CLASSPATH=$JMLCUTE_JAR:$SRC_PATH
-  javac -d $CLASSES_DIR $JAVA_FILES
+  export CLASSPATH=$JMLCUTE_JARS
+  javac -d $CLASSES_DIR -sourcepath $SRC_PATH $JAVA_FILES
 else
   # Print and Weave Aspects.
-  export CLASSPATH=$JMLCUTE_JAR
-  java org.jmlspecs.ajmlrac.Main --destination $CLASSES_DIR --sourcepath $SRC_PATH --classpath $CLASSPATH --source=1.7 --crosscuttingContractSpecifications --adviceChecking --defaultNonNull --mustBeExecutable --Quiet --ajWeaver ajc -P $JAVA_FILES
-  export CLASSPATH=$JMLCUTE_JAR
+  export CLASSPATH=$JMLCUTE_JARS
+  java org.jmlspecs.ajmlrac.Main --destination $CLASSES_DIR --sourcepath $SRC_PATH --classpath $CLASSPATH \
+ --source=1.7 --crosscuttingContractSpecifications --adviceChecking --defaultNonNull --mustBeExecutable --Quiet --ajWeaver ajc -P $JAVA_FILES $JML_FILES
+  export CLASSPATH=$JMLCUTE_JARS
   java org.aspectj.tools.ajc.Main -source 1.7 -d $CLASSES_DIR $JAVA_FILES $CLASSES_DIR/*.aj
 fi
 
 # Generate Test Cases
 # Changing the order in the CLASSPATH will break the script, because different versions of Soot are in both jcute and abc compiler.
-export CLASSPATH=$CLASSES_DIR:$SOOT_JAR:$JMLCUTE_JAR
+export CLASSPATH=$CLASSES_DIR:$SOOT_JAR:$JMLCUTE_JARS
 java -Xmx900m -Djava.library.path="$JAVA_LIB_PATH" -Dcute.sequential=true -Dcute.args="$CUTE_ARGS" pt.ulisboa.tecnico.TestCaseGeneratorApp -main-generate-d $GENERATED_SOURCES_DIR -main-compile-d $CLASSES_DIR -main-instrument-jar $JMLCUTE_PROCESSED_CLASSES_JAR -test-cases-d $GENERATED_TEST_SOURCES_DIR $@
 

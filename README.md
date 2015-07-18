@@ -19,6 +19,7 @@ If you have a 64-bit Linux system, then jmlcute is already built.
 Run
 ---
 To run jmlcute over the FibImpl class in the project within jmlcute-essentials/src/main/java, run './runjmlcute pt.ulisboa.tecnico.internal.FibImpl'.
+To run a modified jcute over the FibImpl class in the project within jmlcute-essentials/src/main/java, run './runjmlcute -no-jml pt.ulisboa.tecnico.internal.FibImpl'.
 
 Help
 ----
@@ -27,4 +28,3 @@ If you find a bug or cannot build or run this project, please contact one of the
 License
 -------
 All licenses are under the license folder.
-

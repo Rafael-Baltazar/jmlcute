@@ -1,8 +1,12 @@
 package samplePackageName;
 
 public class SampleSuperclassName {
-    public SampleClassName superclassApp(SampleClassName a, SampleClassName b) {
+    public SampleClassName superclassApp() {
         System.out.println("superclassApp method");
-        return a;
+        return new SampleClassName();
+    }
+
+    public void superclassThrows() throws Exception {
+        return;
     }
 }

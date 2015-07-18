@@ -625,13 +625,13 @@ AbstractExpressionTranslator {
 		// @ assert left != null;
 		LOG(" --> " + left.getClass().toString());
 		left.accept(this);
-		leftStr = (String) GET_RESULT();
+		leftStr = GET_RESULT();
 
 		JExpression right = self.right();
 		// @ assert right != null;
 		LOG(" --> " + right.getClass().toString());
 		right.accept(this);
-		rightStr = (String) GET_RESULT();
+		rightStr = GET_RESULT();
 
 		// Handle bigints
 		if(left.getApparentType() == JmlStdType.Bigint){
@@ -1346,33 +1346,17 @@ AbstractExpressionTranslator {
 									+ "." + ident;
 									result = meth + argsStr;
 		} else {
-			// meth = kind == ACC_SPEC_PUBLIC ? ident :
-			// this.typeDecl.getCClass().getJavaName()+"."+ident;
 			meth = ident;
-			CClass clazz = self.method().owner();
 			LOG(" --> " + prefix.getClass().toString());
 			prefix.accept(this);
-			String prefixStr = (String) GET_RESULT();
-
-			// is interface method method?
-//			if (kind == ACC_MODEL && clazz.isInterface()) {
-//				// call to the surrogate of the prefix
-//				String cn = TransUtils.dynamicCallName(clazz);
-//				result = "((" + cn + ") " + "JMLChecker.getSurrogate(\"" + cn
-//				+ "\", rac$forName(\"" + cn + "\"), " + prefixStr
-//				+ "))." + meth + argsStr;
-//			} else {
+			String prefixStr = GET_RESULT();
 				// FIXME (ignore "this")
 				if (!"".equals(prefixStr)/* && !"this".equals(prefixStr) */) {
 					result = prefixStr + "." + meth + argsStr;
 				} else {
 					result = meth + argsStr;
 				}
-//			}
 		}
-
-		// LOG("!@! TEMP DEBUG !@! - argsStr : " + argsStr);
-		// LOG("!@! TEMP DEBUG !@! - translateToStaticCall : " + result);
 		RETURN_RESULT(result);
 	}
 	

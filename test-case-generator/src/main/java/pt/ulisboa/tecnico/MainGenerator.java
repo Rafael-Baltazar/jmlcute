@@ -38,26 +38,27 @@ public class MainGenerator {
         final Collection<MainClass> result = new ArrayList<MainClass>();
         final Class clazz = Class.forName(fullyQualifiedName);
         final Method[] methods = clazz.getDeclaredMethods();
-        for (Method method : methods) {
+        for (final Method method : methods) {
             final int modifiers = method.getModifiers();
             if (Modifier.isPublic(modifiers) && !Modifier.isStatic(modifiers)) {
-                final Type[] parameterTypes = method.getGenericParameterTypes();
+                final Type[] parameterTypes = method.getGenericParameterTypes(),
+                        exceptionTypes = method.getGenericExceptionTypes();
                 final String methodName = method.getName(),
                         fileName = appendJavaClassName(fullyQualifiedName,
                                 methodName, parameterTypes, new StringBuilder())
                                 .append(".java").toString(),
                         pack = fullyQualifiedName.substring(0,
-                                fullyQualifiedName.lastIndexOf('.'));
+                                fullyQualifiedName.lastIndexOf('.')),
+                        directoryName = pack.replaceAll("\\.", "/");
                 final StringBuilder javaFile = generateMethod(
-                        fullyQualifiedName, methodName, parameterTypes),
-                        directoryName = new StringBuilder(),
+                        fullyQualifiedName, methodName, parameterTypes,
+                        exceptionTypes),
                         fullJavaClassName = new StringBuilder();
-                directoryName.append(pack.replaceAll("\\.", "/"));
                 fullJavaClassName.append(pack).append(".");
                 appendJavaClassName(fullyQualifiedName, methodName,
                         parameterTypes, fullJavaClassName);
                 final MainClass mainClass = new MainClass(javaFile, fileName,
-                        directoryName.toString(), fullJavaClassName.toString());
+                        directoryName, fullJavaClassName.toString());
                 result.add(mainClass);
             }
         }
@@ -78,7 +79,8 @@ public class MainGenerator {
      */
     private StringBuilder generateMethod(String fullyQualifiedClassName,
                                          String functionName,
-                                         Type[] parameterTypes) {
+                                         Type[] parameterTypes,
+                                         Type[] exceptionTypes) {
         final StringBuilder sb = new StringBuilder();
         indentation = new Indentation();
         appendPackage(fullyQualifiedClassName, sb);
@@ -86,7 +88,7 @@ public class MainGenerator {
         appendJavaClassHeader(fullyQualifiedClassName, functionName,
                 parameterTypes, sb);
         indentation.increase();
-        appendMainHeader(sb);
+        appendMainHeader(sb, exceptionTypes);
         indentation.increase();
         appendMainBody(fullyQualifiedClassName, functionName, parameterTypes,
                 sb);
@@ -149,8 +151,17 @@ public class MainGenerator {
         return sb.append(indentation).append("}\n");
     }
 
-    private StringBuilder appendMainHeader(StringBuilder sb) {
-        return sb.append(indentation).append("public static void main(String[] args) {\n");
+    private StringBuilder appendMainHeader(StringBuilder sb, Type[] exceptionTypes) {
+        sb.append(indentation).append("public static void main(String[] args)");
+        if (exceptionTypes.length > 0) {
+            sb.append(" throws ");
+        }
+        String separator = "";
+        for (Type type : exceptionTypes) {
+            sb.append(separator).append(((Class) type).getName());
+            separator = ", ";
+        }
+        return sb.append(" {\n");
     }
 
     private StringBuilder appendMainFooter(StringBuilder sb) {

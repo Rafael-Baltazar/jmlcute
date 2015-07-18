@@ -424,7 +424,9 @@ abstract public class TransUtils extends Utils implements RacConstants
 	 * <code>value.toString()</code>.
 	 */
 	public static String toString(CType value) {
-		if (value.getTypeID() == TID_TYPE) {
+		if (value == null) {
+			return "java.lang.Object";
+		} else if (value.getTypeID() == TID_TYPE) {
 			return "java.lang.Class";
 		} else if(value == JmlStdType.Bigint) {
 			return "java.math.BigInteger";

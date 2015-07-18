@@ -198,11 +198,6 @@ public class QDoxUtil {
 				System.out.println("really contains = "+javaDeclMeths.size());
 			}
 			
-//			for (Iterator<String> iterator = fileMeths.iterator(); iterator.hasNext();) {
-//				String currentMeth = iterator.next();
-//				System.out.println("matchedMeth = "+currentMeth);
-//			}
-			
 			fileAsString = QDoxUtil.stripMethBodies(fileAsString, javaDeclMeths, fileMeths); // method bodies stripped... [[[hemr]]]
 			
 //			eliminating the pattern --> default {return null;};
