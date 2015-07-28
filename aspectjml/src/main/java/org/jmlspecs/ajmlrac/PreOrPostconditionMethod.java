@@ -1553,7 +1553,7 @@ public abstract class PreOrPostconditionMethod extends AssertionMethod {
         String packageQualifiedName = this.methodDecl.getMethod().owner().packageName().replace("/", ".");
         JavaMethod jm = AspectUtil.getInstance().getCorrespondingJavaMethodThroughJMLMethod(this.methodDecl.getMethod().owner().getJavaName(), this.methodDecl);
         String methodReturnType = "";
-        if ((jm != null) && (!(this.methodDecl.isConstructor()))) {
+        if (jm != null && !this.methodDecl.isConstructor()) {
             if (jm.getReturnType().toString().equals(this.methodDecl.returnType().toString())) {
                 methodReturnType = this.methodDecl.returnType().toString();
             } else {
@@ -1662,15 +1662,15 @@ public abstract class PreOrPostconditionMethod extends AssertionMethod {
                             AspectUtil.getInstance().isAspectAdvice(this.methodDecl)).toString());
                 }
             }
-            code.append(")").append(" :");
-            code.append("\n");
+            code.append(") :\n");
+
             if (this.methodDecl.isConstructor()) {
                 if (instrumentationType.equals("clientAwareChecking")) {
                     code.append("   call(").append(methodQualifiedName).append(")");
                     if (visibility == ACC_PROTECTED) {
                         code.append(" && ");
                         code.append("\n");
-                        code.append("   (within(" + (packageQualifiedName.equals("") ? "" : packageQualifiedName) + "*) || within(" + classQualifiedName + "+))");
+                        code.append("   (within(" + packageQualifiedName + "*) || within(" + classQualifiedName + "+))");
                     } else if (visibility == 0L) {//package
                         code.append(" && ");
                         code.append("\n");
@@ -1765,8 +1765,8 @@ public abstract class PreOrPostconditionMethod extends AssertionMethod {
                     AspectUtil.getInstance().appendPreconditionPointcut(execution);
                     code.append("   (execution(").append(methodReturnType).append(" ").append(methodQualifiedName).append("(").
                             append(AspectUtil.generateMethodParametersForAdvicePointcut(this.parameters).toString()).append(")").append(")").
-                            append(adviceexecution).append(")").append(ifPC).append(" && ");
-                    code.append("\n");
+                            append(adviceexecution).append(")").append(ifPC).append(" && \n");
+
                     code.append("   this(object$rac)");
                 }
             }

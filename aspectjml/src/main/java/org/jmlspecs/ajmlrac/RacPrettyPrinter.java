@@ -410,7 +410,6 @@ implements RacVisitor {
 				print("}");
 			}
 		}
-		
 	}
 
 	/** Prints a JML interface declaration. */

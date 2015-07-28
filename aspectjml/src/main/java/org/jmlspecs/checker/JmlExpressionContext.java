@@ -39,7 +39,7 @@ import org.multijava.util.compiler.UnpositionedError;
  * For example, the JML <tt>\result</tt> expression is allowed only
  * in the normal postcondition. To typecheck the expressions such as 
  * <tt>\result</tt>, we pass to them the fact whether they are being 
- * typechecked in the normal postcondition or not as contexutal 
+ * typechecked in the normal postcondition or not as contextual
  * information.
  *
  * In JML, there are seven context(state)-sensitive expression
@@ -78,8 +78,8 @@ import org.multijava.util.compiler.UnpositionedError;
  * extention;
  * the <em>intracondition</em> is over a single, visible, indefinite
  * (undetermined) state (i.e., some pre or post-state); 
- * the <em>intercondition</em> is over a pair of a pair of visible, 
- * undetermined states (i.e., some pre/post-states).
+ * the <em>intercondition</em> is over a pair of visible, undetermined
+ * states (i.e., some pre/post-states).
  * Both the intra- and intercondition are for class-level specifications
  * such as invariants (intracondition) and history constrainsts 
  * (intercondition).

@@ -586,7 +586,9 @@ abstract public class TransUtils extends Utils implements RacConstants
 	}
 
 	public static void initIncludedInInheritance(CClass cc) {
-		if (includedInInheritance == null) initIncludedInInheritance();
+		if (includedInInheritance == null) {
+			initIncludedInInheritance();
+		}
 		includedInInheritance.add(cc);
 	}
 

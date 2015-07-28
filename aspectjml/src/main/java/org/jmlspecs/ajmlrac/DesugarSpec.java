@@ -96,9 +96,9 @@ public class DesugarSpec extends JmlAbstractVisitor
 	//Debug.initialize(false);
 	//Debug.setPrefix("Desugar");
 
-        this.exceptions = exceptions;
+    this.exceptions = exceptions;
 
-        // for passing arguments and results between visitor methods
+    // for passing arguments and results between visitor methods
 	resultStack = new Stack();
 
 	mspec.accept(this);

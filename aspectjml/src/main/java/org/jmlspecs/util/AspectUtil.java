@@ -476,15 +476,13 @@ public class AspectUtil {
 	public static String changeThisOrSuperRefToAdviceRef(String pred, JmlTypeDeclaration typeDecl){
 		// handling common replacements
 		pred = pred.replace("this.", "object$rac.");
-		
 		try {
 			pred = pred.replace(typeDecl.getCClass().getJavaName()+".object$rac.", "object$rac.");
 			pred = pred.replace(typeDecl.getCClass().ident()+".object$rac.", "object$rac.");
-			pred = pred.replace("super.", "("+"("+typeDecl.getCClass().getSuperClass().getJavaName()+")"+"object$rac).");
-			// handling inner types
+			pred = pred.replace("super.", "(("+typeDecl.getCClass().getSuperClass().getJavaName()+")object$rac).");
 			for (Iterator iterator = typeDecl.inners().iterator(); iterator.hasNext();) {
 				JmlTypeDeclaration currentInnerType = (JmlTypeDeclaration) iterator.next();
-				pred = pred.replace("super.", "("+"("+currentInnerType.getCClass().getSuperClass().getJavaName()+")"+"object$rac).");
+				pred = pred.replace("super.", "(("+currentInnerType.getCClass().getSuperClass().getJavaName()+")object$rac).");
 			}
 			pred = pred.replace("delegee_"+typeDecl.ident()+"().", "");
 			pred = pred.replaceAll("\\bthis\\b", Matcher.quoteReplacement("object$rac"));

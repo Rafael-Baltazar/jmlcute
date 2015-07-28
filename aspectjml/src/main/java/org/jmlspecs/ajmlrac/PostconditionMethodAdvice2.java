@@ -195,7 +195,7 @@ public class PostconditionMethodAdvice2 extends PreOrPostconditionMethod {
             }
         } else {
             methodReturnType = this.methodDecl.returnType().toString();
-        }// methodReturnType = "int"
+        }
 
         boolean isMethodCrosscutSpecChecking = AspectUtil.getInstance().isCrosscutSpecChecking(this.methodDecl);
         if (this.methodDecl.isStatic() || this.methodDecl.isConstructor()) {
@@ -266,8 +266,8 @@ public class PostconditionMethodAdvice2 extends PreOrPostconditionMethod {
             if (this.hasPreExpressions) {
                 for (Iterator iterator = preExprsDecl.iterator(); iterator.hasNext(); ) {
                     String currentPreExprsDecl = (String) iterator.next();
-                    code.append("    boolean " + currentPreExprsDecl + ";");
-                    code.append("\n");
+                    code.append("    boolean " + currentPreExprsDecl + ";\n");
+
                 }
             }
             if (this.hasOldExpressions) {
@@ -315,9 +315,7 @@ public class PostconditionMethodAdvice2 extends PreOrPostconditionMethod {
                 }
             }
             if (canGenerate) {
-                // Assert precondition. TODO: Assume precondition on call from a method not under test.
-                code.append("cute.Cute.Assert(").append(prePred).append(");\n");
-                // Save pre-state.
+                code.append("cute.Cute.Assert(").append(AspectUtil.changeThisOrSuperRefToAdviceRef(prePred, typeDecl)).append(");\n");
                 code.append("      // saving pre-expressions and precondition related old vars\n");
                 if (this.hasOldVariables) {
                     for (Iterator iterator = preconditions.keySet().iterator(); iterator.hasNext(); ) {

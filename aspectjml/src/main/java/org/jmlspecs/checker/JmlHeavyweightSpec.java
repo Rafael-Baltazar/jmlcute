@@ -115,14 +115,13 @@ public abstract class JmlHeavyweightSpec extends JmlSpecCase {
      *
      * @param context the context in which this appears
      * @exception PositionedError if any checks fail */
+    /*@ requires context.getCMethod() != null; */
     public void typecheck( /*@non_null@*/ CFlowControlContextType context ) 
 	throws PositionedError
     {
         // The access modifier of a heavyweight specification case
         // cannot allow more access than the method being specified
         // [JML 7.3].
-
-        //@ assert context.getCMethod() != null;
         long mod = context.getCMethod().modifiers();
         boolean ok = false;
 	if (privacy == ACC_PUBLIC) {

@@ -165,7 +165,7 @@ AbstractExpressionTranslator {
 	public RacNode stmt(boolean wrapped) {
 		perform();
 		String resultStr = resultVar + " = " + resultVar;
-		if (!"".equals(resultingExpression)) {
+		if (!resultingExpression.isEmpty()) {
 			resultStr = resultVar + " = " + resultingExpression + ";";
 		} else {
 			LOG("!!! EMPTY RESULT !!! - visitor is not complete - dummy code generated");
@@ -302,7 +302,7 @@ AbstractExpressionTranslator {
 		boolean isEqualToDefaultEnsuresTokenRef = AspectUtil.getInstance().getDefaultEnsuresClauseTokenRefereces().contains(tref.toString());
 
 		String fileExt = (typeDecl.getCClass().sourceFile().getAbsolutePath().endsWith(".jml")? ".jml": ".java");
-		if(!(isEqualToDefaultRequiresTokenRef) && !(isEqualToDefaultEnsuresTokenRef)){
+		if(!isEqualToDefaultRequiresTokenRef && !isEqualToDefaultEnsuresTokenRef){
 			if(this.tokenReference.length() > 0){
 				this.tokenReference.append(", line ").append(tref.line()).append(", ").append("character ").append(tref.column()).append(" ").append("(").append(this.typeDecl.getCClass().getJavaName()+fileExt+":"+tref.line()).append(")");	
 			}
@@ -1010,8 +1010,8 @@ AbstractExpressionTranslator {
 		LOG(" --> " + prefix.getClass().toString());
 		prefix.accept(this);
 		String prefixStr = (String) GET_RESULT();
-		if (prefixStr == null)
-			prefixStr = "";
+		if (prefixStr == null){
+			prefixStr = "";}
 
 		// generated fields?
 		// TODO what is the purpose of that?
@@ -1054,10 +1054,10 @@ AbstractExpressionTranslator {
 				// TODO is this case needed?
 				// FIXME
 				result = ident;
-				if (prefixStr != null && !prefixStr.equals("") /*
-				 * &&
-				 * !prefixStr.equals("this")
-				 */)
+				if (prefixStr != null && !prefixStr.isEmpty()
+
+
+				 )
 					result = prefixStr + "." + result;
 			}
 		}

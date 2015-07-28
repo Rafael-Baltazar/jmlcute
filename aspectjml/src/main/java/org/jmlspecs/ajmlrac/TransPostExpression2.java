@@ -175,7 +175,7 @@ public/*@ non_null_by_default */ class TransPostExpression2 extends TransExpress
 		Pattern p = Pattern.compile("[[\\_]*[\\w]*[\\_]*]+super.");
 	    Matcher m = p.matcher(resultStr);
 	    if(!m.find()){
-	    	resultStr = resultStr.replace("super.", "("+"("+typeDecl.getCClass().getSuperClass().getJavaName()+")"+"object$rac).");
+	    	resultStr = resultStr.replace("super.", "(("+typeDecl.getCClass().getSuperClass().getJavaName()+")object$rac).");
 	    }
 		resultStr = resultStr.replace("delegee_"+typeDecl.ident()+"().", "");
 		resultStr = resultStr.replace("this", "object$rac");

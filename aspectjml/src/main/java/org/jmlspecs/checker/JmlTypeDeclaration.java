@@ -117,7 +117,6 @@ public abstract class JmlTypeDeclaration extends JmlMemberDeclaration
     {
 	delegee.generateInterface( compiler, owner, host, prefix, isAnon, 
 				   isMember );
-
 	// add the AST for this type declaration to the cache
 	JmlTypeLoader.getJmlSingleton().addTypeDeclAST(this);
     }

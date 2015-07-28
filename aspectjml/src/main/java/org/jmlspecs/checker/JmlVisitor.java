@@ -106,7 +106,7 @@ public interface JmlVisitor extends MjcVisitor {
     void visitJmlNode(/*@non_null*/ JmlNode self );
     void visitJmlNonNullElementsExpression(/*@non_null*/ 
         JmlNonNullElementsExpression self );
-    public void visitJmlAssignmentStatement(/*@non_null*/  JmlAssignmentStatement self );
+    void visitJmlAssignmentStatement(/*@non_null*/  JmlAssignmentStatement self );
     void visitJmlNondetChoiceStatement(/*@non_null*/ JmlNondetChoiceStatement self );
     void visitJmlNondetIfStatement(/*@non_null*/ JmlNondetIfStatement self );
     void visitJmlNormalBehaviorSpec(/*@non_null*/ JmlNormalBehaviorSpec self );

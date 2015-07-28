@@ -81,7 +81,7 @@ public class JmlAssignableClause extends JmlSpecBodyClause {
 		// This only seems to occur in the test cases 
 		// rather than in practice.
 		// !FIXME! should probably give a warning that the 
-		// checking will not be complete (only fields of the 
+		// checking will not be complete (only fields of the
 		// receiver).  
 		fieldSet = new JmlAssignableFieldSet();
 		CExpressionContextType dummyContext 
@@ -211,7 +211,7 @@ public class JmlAssignableClause extends JmlSpecBodyClause {
 
     /**
      * Returns 1 if the given method, <code>meth</code>, is a pure
-     * method. A method is pure if it is annoted with the JML
+     * method. A method is pure if it is annotated with the JML
      * <code>pure</code> modifier or its owner (a class or an
      * interface) is declared as pure. Returns -1 if the given method
      * is not pure; returns 0 if it can not be determined, e.g., no

@@ -80,7 +80,7 @@ public class JmlAssignableFieldSet {
 	} else {
 	    if ( field instanceof JmlSourceField ) {
 		JmlSourceField member = (JmlSourceField) field;
-		member = (JmlSourceField) member.getMostRefined();
+		member = member.getMostRefined();
 		if ( member.isDataGroup() ) {
 		    // data group members are added to both the field set 
 		    // and the data group list.

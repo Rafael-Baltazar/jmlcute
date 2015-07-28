@@ -90,18 +90,15 @@ public class JmlLetVarDecl extends JmlSpecVarDecl {
 	    try {
 		context.addVariable(var);
 		var.typecheck(context);
-
 		// error if old var is unitialized
 		check(context, 
 		      var.hasInitializer(),
 		      JmlMessages.UNINITIALIZED_OLD_VAR,
 		      var.ident());
-
-                // check visibility and purity of the initializer
-                if (var.hasInitializer()) {
-                    JmlExpressionChecker.perform(context, privacy, var.expr());
-                }
-
+		// check visibility and purity of the initializer
+        if (var.hasInitializer()) {
+			JmlExpressionChecker.perform(context, privacy, var.expr());
+		}
 		context.initializeVariable(var);
 	    } catch( UnpositionedError e ) {
 		throw e.addPosition( var.getTokenReference() );

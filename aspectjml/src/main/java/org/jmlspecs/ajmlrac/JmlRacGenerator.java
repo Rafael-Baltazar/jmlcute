@@ -73,12 +73,11 @@ public class JmlRacGenerator extends RacAbstractVisitor implements JmlVisitor {
 	/**
 	 * Translate a JML compilation unit
 	 *
-	 * @param self taget to translate
+	 * @param self target to translate
 	 */
 	public void visitJmlCompilationUnit( JmlCompilationUnit self ) 
 	{
 		isRacable = self.hasSourceInRefinement();
-
 		if (newPackageOption != null) {
 			if (newPackageOption.equals("")) {
 				newPackageName = "";
@@ -92,11 +91,9 @@ public class JmlRacGenerator extends RacAbstractVisitor implements JmlVisitor {
 			}
 			self.setPackage(new JPackageName(org.multijava.util.compiler.TokenReference.NO_REF,newPackageName,null));  
 		}
-
 		// translate types declared in this compilation unit
 		JTypeDeclarationType[] typeDecls = self.combinedTypeDeclarations();
 		boolean ok = true;
-
 		for (int i = 0; i < typeDecls.length ; i++) {
 			JmlTypeDeclaration tdecl = (JmlTypeDeclaration) typeDecls[i];
 			tdecl.setHasSourceInRefinement(isRacable);
@@ -111,7 +108,6 @@ public class JmlRacGenerator extends RacAbstractVisitor implements JmlVisitor {
 		for (int i = 0; i < typeDecls.length ; i++) {
 			typeDecls[i].accept(this);
 		}
-
 		// translate model import statements
 		JPackageImportType[] pkgs = self.importedPackages();
 		for (int i = 0; i < pkgs.length; i++) {
@@ -121,7 +117,6 @@ public class JmlRacGenerator extends RacAbstractVisitor implements JmlVisitor {
 		for (int i = 0; i < classes.length; i++) {
 			classes[i].accept(this);
 		}
-
 		// add an import statement for RAC runtime classes
 		JPackageImportType[] newPkgs = new JPackageImportType[pkgs.length + 1];
 		System.arraycopy(pkgs, 0, newPkgs, 0, pkgs.length);
@@ -129,29 +124,6 @@ public class JmlRacGenerator extends RacAbstractVisitor implements JmlVisitor {
 				org.multijava.util.compiler.TokenReference.NO_REF,
 				"org.jmlspecs.ajmlrac.runtime", null, false);
 		self.setImportedPackages(newPkgs);
-		
-		// add an import statement for Reflection runtime classes
-//		if(AspectUtil.getInstance().hasReflection()) {
-//			JPackageImportType[] wPkgs;
-//			wPkgs = new JPackageImportType[newPkgs.length + 1];
-//			System.arraycopy(newPkgs, 0, wPkgs, 0,newPkgs.length);
-//			wPkgs[newPkgs.length] = 
-//				new JmlPackageImport(org.multijava.util.compiler.TokenReference.NO_REF,
-//						"java.lang.reflect", null, false );
-//			self.setImportedPackages(wPkgs);
-//			AspectUtil.getInstance().setReflection(false);
-//		} 
-
-		// add an import statement for Wrapper runtime classes
-		//		if(checking_mode == WRAPPER) {
-		//		JPackageImportType[] wPkgs;
-		//		wPkgs = new JPackageImportType[newPkgs.length + 1];
-		//		System.arraycopy(newPkgs, 0, wPkgs, 0,newPkgs.length);
-		//		wPkgs[newPkgs.length] = 
-		//		new JmlPackageImport(org.multijava.util.compiler.TokenReference.NO_REF,
-		//		"org.jmlspecs.racwrap.runner", null, false );
-		//		self.setImportedPackages(wPkgs);
-		//		} 
 	}
 
 	/**
@@ -275,6 +247,4 @@ public class JmlRacGenerator extends RacAbstractVisitor implements JmlVisitor {
 	public static final int DEFAULT = 0; //the original JML checking mode
 	public static final int WRAPPER = 1; //the wrapper JML checking mode
 	public static int checking_mode = DEFAULT;
-
 }
-

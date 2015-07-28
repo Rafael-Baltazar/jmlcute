@@ -173,6 +173,6 @@ public abstract class JmlNode extends JPhylum implements Constants {
     //---------------------------------------------------------------------
 
     public static final String MJCVISIT_MESSAGE =
-	"cannot visit a JML AST with an MjcVisitor";
+	"cannot visit a JML AST with a MjcVisitor";
 }
 

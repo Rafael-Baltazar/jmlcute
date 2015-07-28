@@ -117,8 +117,8 @@ public class TransMethod extends TransUtils {
      * @param varGen   variable name generator
      *                 <p/>
      *                 <pre><jml>
-     *                                                                                                                                   requires typeDecl != null && varGen != null;
-     *                                                                                                                                 </jml></pre>
+     *                                                                                                                                                   requires typeDecl != null && varGen != null;
+     *                                                                                                                                                 </jml></pre>
      */
     public TransMethod(JmlTypeDeclaration typeDecl, VarGenerator varGen) {
         this.typeDecl = typeDecl;
@@ -193,29 +193,20 @@ public class TransMethod extends TransUtils {
      * @param methodDecl method to translate
      *                   <p/>
      *                   <pre><jml>
-     *                                                                                                                                                                                                                                                                               requires methodDecl != null && typeDecl.methods().contains(methodDecl);
-     *                                                                                                                                                                                                                                                                               assignable newMethods, newFields, this.methodDecl, desugaredSpec;
-     *                                                                                                                                                                                                                                                                               assignable stackVar;
-     *                                                                                                                                                                                                                                                                               </jml></pre>
+     *                                                                                                                                                                                                                                                                                                 requires methodDecl != null && typeDecl.methods().contains(methodDecl);
+     *                                                                                                                                                                                                                                                                                                 assignable newMethods, newFields, this.methodDecl, desugaredSpec;
+     *                                                                                                                                                                                                                                                                                                 assignable stackVar;
+     *                                                                                                                                                                                                                                                                                                 </jml></pre>
      */
     public void perform(JmlMethodDeclaration methodDecl) {
         this.methodDecl = methodDecl;
-
-        // desugar method specification 
+        // desugar method specification
         if (methodDecl.hasSpecification()) {
             DesugarSpec desugar = new DesugarSpec();
-            desugaredSpec =
-                    desugar.perform(methodDecl.methodSpecification(),
-                            methodDecl.getExceptions());
+            desugaredSpec = desugar.perform(methodDecl.methodSpecification(),
+                    methodDecl.getExceptions());
         }
-        // generate assertion check methods such as pre and postcondition
-        // check methods.
-        //PreValueVars vars = genAssertionMethods();
-        genAssertionMethods();
-
-        // This method must be called last because it produces some
-        // side-effects, e.g., making it a private internal method.
-        //genWrapperMethod();
+        generateAssertionMethods();
     }
 
     /**
@@ -233,11 +224,10 @@ public class TransMethod extends TransUtils {
      * ensures \result != null;
      * </jml></pre>
      */
-    protected PreValueVars genAssertionMethods() {
+    protected PreValueVars generateAssertionMethods() {
         // fresh variable generators
         VarGenerator preVarGen = VarGenerator.forMethod(varGen);
         VarGenerator postVarGen = VarGenerator.forMethod(varGen);
-
         // translation result accumulators
         RacNode preStmt = null;
         RacNode postStmt = null;
@@ -381,11 +371,11 @@ public class TransMethod extends TransUtils {
             int index = 0;
             Iterator iter = specs.iterator();
             while (iter.hasNext()) {
-                SpecCase c = (SpecCase) iter.next();
+                SpecCase specCase = (SpecCase) iter.next();
                 visibility = extractVisibilitySpecs(preVarCount);
                 // translate spec vars if any
-                if (c.hasSpecVarDecls()) {
-                    List oldVars = translateSpecVarDecls(c.specVarDecls(), preVarGen);
+                if (specCase.hasSpecVarDecls()) {
+                    List oldVars = translateSpecVarDecls(specCase.specVarDecls(), preVarGen);
                     if (Main.aRacOptions.callSiteInstrumentation() || Main.aRacOptions.clientAwareChecking()) {
                         //verifying visibility for translation and composition (combination of spec cases)
                         if (visibility == ACC_PUBLIC) {
@@ -402,13 +392,13 @@ public class TransMethod extends TransUtils {
                 }
 
                 // translate precondition if exists; (henrique rebelo)
-                JExpression pred = c.precondition();
-                if (!isMethodCrosscutSpecChecking) {
-                    if (preNonNullExpr != null) {
+                JExpression pred = specCase.precondition();
+                if (!isMethodCrosscutSpecChecking && preNonNullExpr != null) {
+
                         // make non_null annotations a part of precondition
                         if (pred instanceof RacPredicate) {
-                            if (!((RacPredicate) pred).isTrueLiteral())
-                                ((RacPredicate) pred).countCoverage();
+                            if (!((RacPredicate) pred).isTrueLiteral()){
+                                ((RacPredicate) pred).countCoverage();}
                         }
                         if (preNonNullExpr instanceof RacPredicate) {
                             ((RacPredicate) preNonNullExpr).countCoverage();
@@ -417,10 +407,10 @@ public class TransMethod extends TransUtils {
                                 new JConditionalAndExpression(pred.getTokenReference(),
                                         preNonNullExpr, pred);
                         AspectUtil.getInstance().appendDefaultRequiresClauseTokenRefereces(preNonNullExpr.getTokenReference().toString());
-                    }
+
                 }
                 // if the spec cases have preconditions
-                if (c.hasPrecondition() && pred != null) {
+                if (specCase.hasPrecondition() && pred != null) {
                     hasPrecondition = true;
                     transPre = new TransExpression2(preVarGen, ctx, pred, null, typeDecl, "JMLEntryPreconditionError");
                     preStmt = RacParser.parseStatement("", preStmt, transPre.stmt(true));
@@ -473,7 +463,7 @@ public class TransMethod extends TransUtils {
                 }
 
                 // translate postcondition if exists; (henrique rebelo)
-                pred = c.postcondition();
+                pred = specCase.postcondition();
                 if (postNonNullExpr != null) {
                     // make non_null annotations a part of normal postcondition
                     if (pred instanceof RacPredicate) {
@@ -490,7 +480,7 @@ public class TransMethod extends TransUtils {
                     AspectUtil.getInstance().appendDefaultEnsuresClauseTokenRefereces(postNonNullExpr.getTokenReference().toString());
                 }
                 // if the spec cases have postconditions
-                if (c.hasPostcondition()) {
+                if (specCase.hasPostcondition()) {
                     transNPost = new TransPostExpression2(
                             postVarGen, ctx, preVarGen, methodDecl.isStatic(),
                             pred, null, typeDecl, "JMLExitNormalPostconditionError");
@@ -651,10 +641,10 @@ public class TransMethod extends TransUtils {
                 }
 
                 // translate exceptional postcondition if exists; (henrique rebelo)
-                if (c.hasExceptionalPostcondition()) {
-                    xPostcondition = c.exceptionalPostcondition();
+                if (specCase.hasExceptionalPostcondition()) {
+                    xPostcondition = specCase.exceptionalPostcondition();
                     if (this.hasFieldReferenceInPrecondition(transPreStr) || this.hasMethodCallExpInPrecondition(transPreStr)) {
-                        if (c.hasPostcondition()) {
+                        if (specCase.hasPostcondition()) {
                             if (Main.aRacOptions.clientAwareChecking()) {
                                 //verifying visibility for translation and composition (combination of spec cases)
                                 if (visibility == ACC_PUBLIC) {
@@ -1187,7 +1177,7 @@ public class TransMethod extends TransUtils {
             }
         } else {
             if (isMethodCrosscutSpecChecking) {
-                // does not matter if we use execution or call site... in the crosscutting contract specification the
+                // does not matter if we use execution or call site... in the crosscutting contract specification
                 // the instrumentation comes directly from the pointcut declaration --- [[[hemr]]]
                 if (((AspectUtil.getInstance().hasElementsStoredOldExpressions(oldExprs) || (preExprs.size() > 0) || (AspectUtil.getInstance().hasElementsStoredOldExpressions(oldVarsDecl))))) {
                     PostconditionMethodAdvice2 npma = new PostconditionMethodAdvice2(typeDecl,
@@ -1607,23 +1597,18 @@ public class TransMethod extends TransUtils {
     }
 
     private List getAllInheritedFields() {
-        Collection collect = null;
+        Collection collect;
         List listFields = new ArrayList();
-
         try {
             CClassType superType = this.typeDecl.getCClass().getSuperType();
-            collect = superType.getCClass().fields();
             CClassType[] interfaces = this.typeDecl.getCClass().getInterfaces();
-
             while (!superType.ident().equals("Object")) {
                 collect = superType.getCClass().fields();
                 for (Iterator iter = collect.iterator(); iter.hasNext(); ) {
                     listFields.add(iter.next());
                 }
-
                 superType = superType.getCClass().getSuperType();
             }
-
             for (int i = 0; i < interfaces.length; i++) {
                 collect = interfaces[i].getCClass().fields();
                 for (Iterator iter = collect.iterator(); iter.hasNext(); ) {
@@ -1632,7 +1617,6 @@ public class TransMethod extends TransUtils {
             }
         } catch (Exception e) {
         }
-
         return listFields;
     }
 
@@ -2277,7 +2261,6 @@ public class TransMethod extends TransUtils {
             JmlRacGenerator.fail(sigClause.getTokenReference(), JmlMessages.INVALID_SIGNALS_CLAUSE, "");
         }
         JmlPredicate pred = sigClause.predOrNot();
-        String var = varGen.freshPostVar();
         RacContext ctx = RacContext.createPositive();
         boolean isMethodCrosscutSpecChecking = AspectUtil.getInstance().isCrosscutSpecChecking(this.methodDecl);
         TransPostExpression2 trans =

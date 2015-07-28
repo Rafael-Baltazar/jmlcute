@@ -231,7 +231,7 @@ public class JmlSetComprehension extends JmlExpression {
 	return this;
     }
 
-    /** Is the superset predicate structurally ell-formed, i.e., 
+    /** Is the superset predicate structurally well-formed, i.e.,
      * of the form exp.has(ident)?
      */
     private boolean isSupersetPredWellFormed() {

@@ -34,7 +34,7 @@ import org.multijava.util.compiler.PositionedError;
  */
 
 /**
- * This abstract class represents a specfication body clause that
+ * This abstract class represents a specification body clause that
  * allows the predicate or expression to be replaced by
  * <code>\not_specified</code> (e.g., JmlDivergesClause,
  * JmlEnsuresClause, JmlWorkingSpaceClause, JmlDurationClause,

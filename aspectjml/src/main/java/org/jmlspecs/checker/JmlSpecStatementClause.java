@@ -32,7 +32,7 @@ import org.multijava.util.compiler.TokenReference;
  */
 
 /**
- * This abstract class is a common superclass of specfication statement clauses
+ * This abstract class is a common superclass of specification statement clauses
  * (e.g.,  JmlReturnsClause, JmlBreaksClause and JmlContinuesClause).
  */
 
