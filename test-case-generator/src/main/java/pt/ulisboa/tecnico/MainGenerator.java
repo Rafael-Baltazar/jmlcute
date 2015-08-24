@@ -9,7 +9,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Generates java files for each of the methods of the class under test. Each of the java files will
+ * Generates java files for each of the methods of the class under test. Each
+ * of the java files will
  */
 public class MainGenerator {
     private Indentation indentation;
@@ -88,7 +89,7 @@ public class MainGenerator {
         appendJavaClassHeader(fullyQualifiedClassName, functionName,
                 parameterTypes, sb);
         indentation.increase();
-        appendMainHeader(sb, exceptionTypes);
+        appendMainHeader(sb);
         indentation.increase();
         appendMainBody(fullyQualifiedClassName, functionName, parameterTypes,
                 sb);
@@ -151,17 +152,9 @@ public class MainGenerator {
         return sb.append(indentation).append("}\n");
     }
 
-    private StringBuilder appendMainHeader(StringBuilder sb, Type[] exceptionTypes) {
-        sb.append(indentation).append("public static void main(String[] args)");
-        if (exceptionTypes.length > 0) {
-            sb.append(" throws ");
-        }
-        String separator = "";
-        for (Type type : exceptionTypes) {
-            sb.append(separator).append(((Class) type).getName());
-            separator = ", ";
-        }
-        return sb.append(" {\n");
+    private StringBuilder appendMainHeader(StringBuilder sb) {
+        return sb.append(indentation)
+                .append("public static void main(String[] args) throws Throwable {\n");
     }
 
     private StringBuilder appendMainFooter(StringBuilder sb) {

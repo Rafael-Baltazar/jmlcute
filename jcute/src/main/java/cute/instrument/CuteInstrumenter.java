@@ -82,7 +82,7 @@ int f(int x,int y){
 public class CuteInstrumenter extends BodyTransformer {
     public SymbolTable st;
     public static boolean isConcurrent = true;
-    private static CuteInstrumenter instance= new CuteInstrumenter();
+    private static CuteInstrumenter instance = new CuteInstrumenter();
     private static String mainClass;
 
     private CuteInstrumenter() {
@@ -113,7 +113,8 @@ public class CuteInstrumenter extends BodyTransformer {
             } else if (s instanceof LookupSwitchStmt) {
                 tBanchCount += ((LookupSwitchStmt) s).getTargetCount();
             } else if (s instanceof TableSwitchStmt) {
-                tBanchCount += ((TableSwitchStmt) s).getHighIndex() - ((TableSwitchStmt) s).getLowIndex() + 1;
+                tBanchCount += ((TableSwitchStmt) s).getHighIndex() -
+                        ((TableSwitchStmt) s).getLowIndex() + 1;
             }
         }
         stmtIt = units.snapshotIterator();
@@ -126,26 +127,33 @@ public class CuteInstrumenter extends BodyTransformer {
                 lineNo = ((LineNumberTag) s.getTags().get(0)).getLineNumber();
             }
             if (s instanceof EnterMonitorStmt || s instanceof ExitMonitorStmt) {
-                InstrumentMonitorStatements.instrument(s, units, isConcurrent, lineNo);
+                InstrumentMonitorStatements.instrument(s, units, isConcurrent,
+                        lineNo);
             } else if (s instanceof AssignStmt) {
-                InstrumentAssignmentStatement.instrument(s, body, units, isConcurrent, st, lineNo);
+                InstrumentAssignmentStatement.instrument(s, body, units,
+                        isConcurrent, st, lineNo);
             } else if (s instanceof InvokeStmt) {
-                InstrumentInvokeStatement.instrument(s, body, units, st, isConcurrent, lineNo);
+                InstrumentInvokeStatement.instrument(s, body, units, st,
+                        isConcurrent, lineNo);
             } else if (s instanceof IdentityStmt) {
                 InstrumentIdentityStatement.instrument(s, units, st, lineNo);
             } else if (s instanceof ReturnStmt) {
                 InstrumentReturnStatement.instrument(s, units, st, lineNo);
             } else if (s instanceof ReturnVoidStmt) {
-                InstrumentReturnVoidStatement.instrument(thisMethod, s, units, isConcurrent, lineNo, mainClass);
+                InstrumentReturnVoidStatement.instrument(
+                        thisMethod, s, units, isConcurrent, lineNo, mainClass);
             } else if (s instanceof IfStmt) {
-                branchCount = InstrumentIfStatement.instrument(branchCount, tBanchCount,
-                        s, thisMethod, body, units, st, isConcurrent, lineNo);
+                branchCount = InstrumentIfStatement.instrument(
+                        branchCount, tBanchCount, s, thisMethod, body, units,
+                        st, isConcurrent, lineNo);
             } else if (s instanceof LookupSwitchStmt) {
-                branchCount = InstrumentLookupSwitchStatement.instrument(branchCount, tBanchCount,
-                        s, thisMethod, body, units, st, isConcurrent, lineNo);
+                branchCount = InstrumentLookupSwitchStatement.instrument(
+                        branchCount, tBanchCount, s, thisMethod, body, units,
+                        st, isConcurrent, lineNo);
             } else if (s instanceof TableSwitchStmt) {
-                branchCount = InstrumentTableSwitchStatement.instrument(branchCount, tBanchCount,
-                        s, thisMethod, body, units, st, isConcurrent, lineNo);
+                branchCount = InstrumentTableSwitchStatement.instrument(
+                        branchCount, tBanchCount, s, thisMethod, body, units,
+                        st, isConcurrent, lineNo);
             }
         }
         WrapWholeBodyInTryCatch.instrument(body, thisMethod, isConcurrent, mainClass);

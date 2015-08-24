@@ -239,10 +239,9 @@ public class TestCaseGeneratorApp {
             public void run() {
                 final BufferedReader br = new BufferedReader(
                         new InputStreamReader(process.getInputStream()));
-                String line;
                 try {
-                    while ((line = br.readLine()) != null) {
-                        System.err.println(line);
+                    while (br.readLine() != null) {
+                        //Ignore line.
                     }
                     br.close();
                 } catch (IOException e) {
@@ -284,7 +283,7 @@ public class TestCaseGeneratorApp {
     private int runMain(MainClass mainClass) throws IOException {
         int exit;
         final ProcessBuilder pb = new ProcessBuilder("java",
-                "-cp", getMainInstrDestJar() + ":" + getClasspath(),
+                "-classpath", getMainInstrDestJar() + ":" + getClasspath(),
                 "-Djava.library.path=" + System.getProperty("java.library.path"),
                 "-Dcute.args=" + System.getProperty("cute.args") + (resetSearch
                         ? ":-m:2" : ""),

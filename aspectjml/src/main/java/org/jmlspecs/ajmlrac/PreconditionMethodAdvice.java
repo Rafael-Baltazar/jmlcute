@@ -79,10 +79,11 @@ public class PreconditionMethodAdvice extends PreOrPostconditionMethod {
         throw new UnsupportedOperationException();
     }
 
-    public JMethodDeclarationType generate(RacNode stmt, String pred, String context, String tokenReference, String instrumentationType, long visibility, boolean isEmptySpecCaseWithNonNullPre) {
+    public JMethodDeclarationType generate(RacNode stmt, String pred, String instrumentationType, long visibility) {
         StringBuffer code = new StringBuffer("");
         if (this.hasAssertion) {
-            pred = AspectUtil.changeThisOrSuperRefToAdviceRef(pred, typeDecl);boolean isMethodCrosscutSpecChecking = AspectUtil.getInstance().isCrosscutSpecChecking(this.methodDecl);
+            pred = AspectUtil.changeThisOrSuperRefToAdviceRef(pred, typeDecl);
+            boolean isMethodCrosscutSpecChecking = AspectUtil.getInstance().isCrosscutSpecChecking(this.methodDecl);
             StringBuffer codeTmp = this.buildAdviceHeader("PreconditionAssertionMethod", instrumentationType, visibility, isMethodCrosscutSpecChecking);
             code.append(codeTmp.toString());
             code.append("  {\n");

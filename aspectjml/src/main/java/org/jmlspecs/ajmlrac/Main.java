@@ -119,7 +119,7 @@ public class Main extends org.jmlspecs.checker.Main {
 		if(aRacOptions.verbose()){
 			System.err.println("[ compilation time in milliseconds = "+difference+" ]");
 			long seconds = TimeUnit.MILLISECONDS.toSeconds(difference);
-			System.err.println("[ compilation time i seconds = "+seconds+" ]");
+			System.err.println("[ compilation time in seconds = "+seconds+" ]");
 		}
 		System.exit(success ? 0 : 1);
 	}

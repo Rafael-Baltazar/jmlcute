@@ -210,12 +210,6 @@ public class InvariantMethodAdviceAsPreconditionMethodCallSite extends Invariant
 				code.append("          throw new JMLEvaluationError(evalErrorMsg + rac$cause);\n");
 				code.append("        }\n");
 				code.append("       }\n");
-				if(Main.aRacOptions.multipleSpecCaseChecking()){
-					code.append("     JMLChecker.checkInvariantMultipleSpecCaseChecking(rac$b, invErrorMsg, -1);\n");
-				}
-				else{
-					code.append("     JMLChecker.checkInvariant(rac$b, invErrorMsg, -1);\n");
-				}
 				code.append("\n").append("   }");
 				code.append("\n");
 				code.append("\n");

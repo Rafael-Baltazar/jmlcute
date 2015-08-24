@@ -983,11 +983,9 @@ public class TransMethod extends TransUtils {
                     AspectUtil.getInstance().appendPreconditionNewMethodsAdvice(pma.generate(
                             preStmt,
                             publicPrecondition.toString(),
-                            this.getContextValues(publicPrecondition.toString()),
-                            publicPreTokenReference.toString(),
                             "clientAwareChecking",
-                            ACC_PUBLIC,
-                            isEmptySpecCaseWithNonNullPre));
+                            ACC_PUBLIC
+                    ));
                 }
                 if (AspectUtil.hasAssertion(publicNPostcondition.toString()) || (publicEpostCode.size() > 0)) {
                     PostconditionMethodAdvice npma = new PostconditionMethodAdvice(
@@ -1036,11 +1034,9 @@ public class TransMethod extends TransUtils {
                     AspectUtil.getInstance().appendPreconditionNewMethodsAdvice(pma.generate(
                             preStmt,
                             protectedPrecondition.toString(),
-                            this.getContextValues(protectedPrecondition.toString()),
-                            protectedPreTokenReference.toString(),
                             "clientAwareChecking",
-                            ACC_PROTECTED,
-                            isEmptySpecCaseWithNonNullPre));
+                            ACC_PROTECTED
+                    ));
                 }
                 if (AspectUtil.hasAssertion(protectedNPostcondition.toString()) || (protectedEpostCode.size() > 0)) {
                     PostconditionMethodAdvice npma = new PostconditionMethodAdvice(
@@ -1091,11 +1087,9 @@ public class TransMethod extends TransUtils {
                     AspectUtil.getInstance().appendPreconditionNewMethodsAdvice(pma.generate(
                             preStmt,
                             defaultPrecondition.toString(),
-                            this.getContextValues(defaultPrecondition.toString()),
-                            defaultPreTokenReference.toString(),
                             "clientAwareChecking",
-                            0L, //default
-                            isEmptySpecCaseWithNonNullPre));
+                            0L //default
+                    ));
                 }
                 if (AspectUtil.hasAssertion(defaultNPostcondition.toString()) || (defaultEpostCode.size() > 0)) {
                     PostconditionMethodAdvice npma = new PostconditionMethodAdvice(
@@ -1145,11 +1139,9 @@ public class TransMethod extends TransUtils {
                     AspectUtil.getInstance().appendPreconditionNewMethodsAdvice(pma.generate(
                             preStmt,
                             privatePrecondition.toString(),
-                            this.getContextValues(privatePrecondition.toString()),
-                            privatePreTokenReference.toString(),
                             "clientAwareChecking",
-                            ACC_PRIVATE,
-                            isEmptySpecCaseWithNonNullPre));
+                            ACC_PRIVATE
+                    ));
                 }
                 if (AspectUtil.hasAssertion(privateNPostcondition.toString()) || (privateEpostCode.size() > 0)) {
                     PostconditionMethodAdvice npma = new PostconditionMethodAdvice(
@@ -1204,11 +1196,9 @@ public class TransMethod extends TransUtils {
                         AspectUtil.getInstance().appendPreconditionNewMethodsAdviceXCS(pma.generate(
                                 preStmt,
                                 precondition.toString(),
-                                this.getContextValues(precondition.toString()),
-                                preTokenReference.toString(),
                                 "executionSite",
-                                -1,
-                                isEmptySpecCaseWithNonNullPre));
+                                -1
+                        ));
                     }
                     if (AspectUtil.hasAssertion(nPostcondition.toString()) || (epostCode.size() > 0)) {
                         PostconditionMethodAdvice npma = new PostconditionMethodAdvice(typeDecl,
@@ -1261,11 +1251,9 @@ public class TransMethod extends TransUtils {
                             AspectUtil.getInstance().appendPreconditionNewMethodsAdvice(pma.generate(
                                     preStmt,
                                     precondition.toString(),
-                                    this.getContextValues(precondition.toString()),
-                                    preTokenReference.toString(),
                                     "callSite",
-                                    -1,
-                                    isEmptySpecCaseWithNonNullPre));
+                                    -1
+                            ));
                         }
                         if (AspectUtil.hasAssertion(nPostcondition.toString()) || (epostCode.size() > 0)) {
                             PostconditionMethodAdvice npma = new PostconditionMethodAdvice(
@@ -1318,11 +1306,9 @@ public class TransMethod extends TransUtils {
                             AspectUtil.getInstance().appendPreconditionNewMethodsAdvice(prema.generate(
                                     preStmt,
                                     precondition.toString(),
-                                    this.getContextValues(precondition.toString()),
-                                    preTokenReference.toString(),
                                     "executionSite",
-                                    -1,
-                                    isEmptySpecCaseWithNonNullPre));
+                                    -1
+                            ));
                         }
                         if (AspectUtil.hasAssertion(nPostcondition.toString()) || (epostCode.size() > 0)) {
                             PostconditionMethodAdvice npma = new PostconditionMethodAdvice(

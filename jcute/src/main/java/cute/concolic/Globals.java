@@ -139,7 +139,6 @@ public class Globals {
         initialize();
         this.initialized = true;
         this.sched.setPriority(Thread.MIN_PRIORITY);
-        //Runtime.getRuntime().addShutdownHook(new SolveOnExit());
         this.sched.start();
     }
 

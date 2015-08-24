@@ -455,6 +455,7 @@ public class PostconditionMethodAdvice2 extends PreOrPostconditionMethod {
         }
         // Exceptional post-conditions.
         code.append("    } catch (Throwable rac$e) {\n");
+        code.append("        Throwable jml$ex = rac$e;\n");
         {
             for (Iterator iterator = xPostCode.iterator(); iterator.hasNext(); ) {
                 code.append(iterator.next());

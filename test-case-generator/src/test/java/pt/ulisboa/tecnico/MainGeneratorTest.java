@@ -46,7 +46,7 @@ public class MainGeneratorTest extends TestCase {
         sb.append("package samplePackageName;\n");
         sb.append("\n");
         sb.append("public class jmlcute__samplePackageName__SampleClassName__app_samplePackageName__SampleClassName_int {\n");
-        sb.append("  public static void main(String[] args) {\n");
+        sb.append("  public static void main(String[] args) throws Throwable {\n");
         sb.append("    samplePackageName.SampleClassName receiver = (samplePackageName.SampleClassName) cute.Cute.input.Object(\"samplePackageName.SampleClassName\");\n");
         sb.append("    cute.Cute.Assume(receiver != null);\n");
         sb.append("    samplePackageName.SampleClassName arg0 = (samplePackageName.SampleClassName) cute.Cute.input.Object(\"samplePackageName.SampleClassName\");\n");
@@ -63,7 +63,7 @@ public class MainGeneratorTest extends TestCase {
      * (superclassApp and superclassThrows).
      */
     public void testSampleSuperclassName() {
-        MainGenerator mainGenerator = new MainGenerator();
+        final MainGenerator mainGenerator = new MainGenerator();
         MainClass[] mainClasses = new MainClass[0];
         try {
             mainClasses = mainGenerator.generate(
@@ -72,20 +72,21 @@ public class MainGeneratorTest extends TestCase {
             fail("samplePackageName.SampleSuperclassName was not found.");
         }
         assertTrue("mainClasses is of incorrect size.", mainClasses.length == 2);
-        String zeroDirectoryName = mainClasses[0].getDirectoryName(),
+        final String zeroDirectoryName = mainClasses[0].getDirectoryName(),
                 oneDirectoryName = mainClasses[1].getDirectoryName();
         assertTrue("First directory name is incorrect.",
                 zeroDirectoryName.equals("samplePackageName"));
         assertTrue("Second directory name is incorrect.",
                 oneDirectoryName.equals("samplePackageName"));
-        String zeroFileName = mainClasses[0].getFileName();
-        String oneFileName = mainClasses[1].getFileName();
-        StringBuilder sbApp = new StringBuilder();
+        final String zeroFileName = mainClasses[0].getFileName(),
+                oneFileName = mainClasses[1].getFileName();
+        final StringBuilder sbApp = new StringBuilder(),
+                sbThrows = new StringBuilder();
         sbApp.append("package samplePackageName;\n");
         sbApp.append("\n");
         sbApp.append("public class jmlcute__samplePackageName__" +
                 "SampleSuperclassName__superclassApp {\n");
-        sbApp.append("  public static void main(String[] args) {\n");
+        sbApp.append("  public static void main(String[] args) throws Throwable {\n");
         sbApp.append("    samplePackageName.SampleSuperclassName receiver = " +
                 "(samplePackageName.SampleSuperclassName) cute.Cute.input.Object" +
                 "(\"samplePackageName.SampleSuperclassName\");\n");
@@ -93,13 +94,11 @@ public class MainGeneratorTest extends TestCase {
         sbApp.append("    receiver.superclassApp();\n");
         sbApp.append("  }\n");
         sbApp.append("}\n");
-        StringBuilder sbThrows = new StringBuilder();
         sbThrows.append("package samplePackageName;\n");
         sbThrows.append("\n");
         sbThrows.append("public class jmlcute__samplePackageName__" +
                 "SampleSuperclassName__superclassThrows {\n");
-        sbThrows.append("  public static void main(String[] args) throws " +
-                "java.lang.Exception {\n");
+        sbThrows.append("  public static void main(String[] args) throws Throwable {\n");
         sbThrows.append("    samplePackageName.SampleSuperclassName receiver" +
                 " = (samplePackageName.SampleSuperclassName) cute.Cute.input" +
                 ".Object(\"samplePackageName.SampleSuperclassName\");\n");

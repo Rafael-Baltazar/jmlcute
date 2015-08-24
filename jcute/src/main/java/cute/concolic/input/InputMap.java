@@ -482,10 +482,10 @@ public class InputMap implements Printable {
             try {
                 return c.newInstance();
             } catch (InstantiationException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                e.printStackTrace();
                 System.exit(1);
             } catch (IllegalAccessException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                e.printStackTrace();
                 System.exit(1);
             }
         }
