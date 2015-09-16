@@ -40,12 +40,11 @@ public class MainGeneratorTest extends TestCase {
         String directoryName = mainClasses[0].getDirectoryName();
         assertTrue("Directory name is incorrect.", directoryName.equals("samplePackageName"));
         String fileName = mainClasses[0].getFileName();
-        assertTrue("File name is incorrect.", fileName
-                .equals("jmlcute__samplePackageName__SampleClassName__app_samplePackageName__SampleClassName_int.java"));
+        assertTrue("File name is incorrect.", fileName.equals("jmlcute1.java"));
         StringBuilder sb = new StringBuilder();
         sb.append("package samplePackageName;\n");
         sb.append("\n");
-        sb.append("public class jmlcute__samplePackageName__SampleClassName__app_samplePackageName__SampleClassName_int {\n");
+        sb.append("public class jmlcute1 {\n");
         sb.append("  public static void main(String[] args) throws Throwable {\n");
         sb.append("    samplePackageName.SampleClassName receiver = (samplePackageName.SampleClassName) cute.Cute.input.Object(\"samplePackageName.SampleClassName\");\n");
         sb.append("    cute.Cute.Assume(receiver != null);\n");
@@ -72,20 +71,59 @@ public class MainGeneratorTest extends TestCase {
             fail("samplePackageName.SampleSuperclassName was not found.");
         }
         assertTrue("mainClasses is of incorrect size.", mainClasses.length == 2);
-        final String zeroDirectoryName = mainClasses[0].getDirectoryName(),
-                oneDirectoryName = mainClasses[1].getDirectoryName();
+        final String firstDirectoryName = mainClasses[0].getDirectoryName();
+        final String secondDirectoryName = mainClasses[1].getDirectoryName();
         assertTrue("First directory name is incorrect.",
-                zeroDirectoryName.equals("samplePackageName"));
+                firstDirectoryName.equals("samplePackageName"));
         assertTrue("Second directory name is incorrect.",
-                oneDirectoryName.equals("samplePackageName"));
-        final String zeroFileName = mainClasses[0].getFileName(),
-                oneFileName = mainClasses[1].getFileName();
-        final StringBuilder sbApp = new StringBuilder(),
-                sbThrows = new StringBuilder();
+                secondDirectoryName.equals("samplePackageName"));
+        final String firstName = mainClasses[0].getFileName();
+        final String firstFile = mainClasses[0].getJavaFile().toString();
+        final String secondName = mainClasses[1].getFileName();
+        final String secondFile = mainClasses[1].getJavaFile().toString();
+        final String oneName = "jmlcute1.java";
+        final String oneAppFile = createAppFile("jmlcute1").toString();
+        final String oneThrowsFile = createThrowsFile("jmlcute1").toString();
+        final String twoName = "jmlcute2.java";
+        final String twoAppFile = createAppFile("jmlcute2").toString();
+        final String twoThrowsFile = createThrowsFile("jmlcute2").toString();
+        final boolean firstIsOneName = firstName.equals(oneName);
+        if (firstIsOneName) {
+            assertEquals("Incorrect file name.", twoName, secondName);
+        } else {
+            assertEquals("Incorrect file name.", twoName, firstName);
+            assertEquals("Incorrect file name.", oneName, secondName);
+        }
+        final boolean firstIsOneAppFile = firstFile.equals(oneAppFile);
+        final boolean firstIsOneThrowsFile = firstFile.equals(oneThrowsFile);
+        final boolean firstIsTwoAppFile = firstFile.equals(twoAppFile);
+        final boolean firstIsTwoThrowsFile = firstFile.equals(twoThrowsFile);
+        final boolean secondIsOneAppFile = secondFile.equals(oneAppFile);
+        final boolean secondIsOneThrowsFile = secondFile.equals(oneThrowsFile);
+        final boolean secondIsTwoAppFile = secondFile.equals(twoAppFile);
+        final boolean secondIsTwoThrowsFile = secondFile.equals(twoThrowsFile);
+        if (firstIsOneName) {
+            if (firstIsOneAppFile) {
+                assertTrue("Incorrect java file.", secondIsTwoThrowsFile);
+            } else {
+                assertTrue("Incorrect java file.", firstIsOneThrowsFile
+                        && secondIsTwoAppFile);
+            }
+        } else {
+            if (firstIsTwoAppFile) {
+                assertTrue("Incorrect java file.", secondIsOneThrowsFile);
+            } else {
+                assertTrue("Incorrect java file.", firstIsTwoThrowsFile
+                        && secondIsOneAppFile);
+            }
+        }
+    }
+
+    private StringBuilder createAppFile(final String classname) {
+        final StringBuilder sbApp = new StringBuilder("");
         sbApp.append("package samplePackageName;\n");
         sbApp.append("\n");
-        sbApp.append("public class jmlcute__samplePackageName__" +
-                "SampleSuperclassName__superclassApp {\n");
+        sbApp.append("public class ").append(classname).append(" {\n");
         sbApp.append("  public static void main(String[] args) throws Throwable {\n");
         sbApp.append("    samplePackageName.SampleSuperclassName receiver = " +
                 "(samplePackageName.SampleSuperclassName) cute.Cute.input.Object" +
@@ -94,10 +132,14 @@ public class MainGeneratorTest extends TestCase {
         sbApp.append("    receiver.superclassApp();\n");
         sbApp.append("  }\n");
         sbApp.append("}\n");
+        return sbApp;
+    }
+
+    private StringBuilder createThrowsFile(final String classname) {
+        StringBuilder sbThrows = new StringBuilder("");
         sbThrows.append("package samplePackageName;\n");
         sbThrows.append("\n");
-        sbThrows.append("public class jmlcute__samplePackageName__" +
-                "SampleSuperclassName__superclassThrows {\n");
+        sbThrows.append("public class ").append(classname).append(" {\n");
         sbThrows.append("  public static void main(String[] args) throws Throwable {\n");
         sbThrows.append("    samplePackageName.SampleSuperclassName receiver" +
                 " = (samplePackageName.SampleSuperclassName) cute.Cute.input" +
@@ -106,36 +148,6 @@ public class MainGeneratorTest extends TestCase {
         sbThrows.append("    receiver.superclassThrows();\n");
         sbThrows.append("  }\n");
         sbThrows.append("}\n");
-        final boolean zeroIsAppFileName = zeroFileName.equals("jmlcute__" +
-                "samplePackageName__SampleSuperclassName__superclassApp.java"),
-                zeroIsThrowsFileName = zeroFileName.equals("jmlcute__" +
-                        "samplePackageName__SampleSuperclassName__" +
-                        "superclassThrows.java"),
-                oneIsAppFileName = oneFileName.equals("jmlcute__" +
-                        "samplePackageName__SampleSuperclassName__" +
-                        "superclassApp.java"),
-                oneIsThrowsFileName = oneFileName.equals("jmlcute__" +
-                        "samplePackageName__SampleSuperclassName__" +
-                        "superclassThrows.java");
-        if (zeroIsAppFileName) {
-            assertTrue("The second file name is incorrect.", oneIsThrowsFileName);
-        } else {
-            assertTrue("The first file name is incorrect.", zeroIsThrowsFileName);
-            assertTrue("The second file name is incorrect.", oneIsAppFileName);
-        }
-        final boolean zeroIsAppFile = mainClasses[0].getJavaFile().toString()
-                .equals(sbApp.toString()),
-                zeroIsThrowsFile = mainClasses[0].getJavaFile().toString()
-                        .equals(sbThrows.toString()),
-                oneIsAppFile = mainClasses[1].getJavaFile().toString()
-                        .equals(sbApp.toString()),
-                oneIsThrowsFile = mainClasses[1].getJavaFile().toString()
-                        .equals(sbThrows.toString());
-        if (zeroIsAppFile) {
-            assertTrue("The second MainClass is incorrect.", oneIsThrowsFile);
-        } else {
-            assertTrue("The first MainClass is incorrect.", zeroIsThrowsFile);
-            assertTrue("The second MainClass is incorrect.", oneIsAppFile);
-        }
+        return sbThrows;
     }
 }

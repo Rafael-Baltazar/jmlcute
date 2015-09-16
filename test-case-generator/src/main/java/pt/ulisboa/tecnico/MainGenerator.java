@@ -10,22 +10,32 @@ import java.util.TreeMap;
 
 /**
  * Generates java files for each of the methods of the class under test. Each
- * of the java files will
+ * of the java files will have a public static void main(String[]) method that
+ * calls the method under test with the given CUTE input variables.
  */
 public class MainGenerator {
     private Indentation indentation;
     private final Map<String, String> inputTypes;
+    private long counter = 0;
 
     public MainGenerator() {
         inputTypes = new TreeMap<String, String>();
         inputTypes.put("boolean", "Boolean()");
+        inputTypes.put("java.lang.Boolean", "Boolean()");
         inputTypes.put("short", "Short()");
+        inputTypes.put("java.lang.Short", "Short()");
         inputTypes.put("int", "Integer()");
+        inputTypes.put("java.lang.Integer", "Integer()");
         inputTypes.put("long", "Long()");
+        inputTypes.put("java.lang.Long", "Long()");
         inputTypes.put("float", "Float()");
+        inputTypes.put("java.lang.Float", "Float()");
         inputTypes.put("double", "Double()");
+        inputTypes.put("java.lang.Double", "Double()");
         inputTypes.put("char", "Character()");
+        inputTypes.put("java.lang.Character", "Character()");
         inputTypes.put("byte", "Byte()");
+        inputTypes.put("java.lang.Byte", "Byte()");
     }
 
     /**
@@ -37,27 +47,24 @@ public class MainGenerator {
      */
     public MainClass[] generate(String fullyQualifiedName) throws ClassNotFoundException {
         final Collection<MainClass> result = new ArrayList<MainClass>();
-        final Class clazz = Class.forName(fullyQualifiedName);
-        final Method[] methods = clazz.getDeclaredMethods();
+        final Class klass = Class.forName(fullyQualifiedName);
+        final Method[] methods = klass.getDeclaredMethods();
         for (final Method method : methods) {
-            final int modifiers = method.getModifiers();
-            if (Modifier.isPublic(modifiers) && !Modifier.isStatic(modifiers)) {
+            if (isMethodGeneratable(method)) {
+                counter++;
                 final Type[] parameterTypes = method.getGenericParameterTypes(),
                         exceptionTypes = method.getGenericExceptionTypes();
-                final String methodName = method.getName(),
-                        fileName = appendJavaClassName(fullyQualifiedName,
-                                methodName, parameterTypes, new StringBuilder())
-                                .append(".java").toString(),
-                        pack = fullyQualifiedName.substring(0,
-                                fullyQualifiedName.lastIndexOf('.')),
-                        directoryName = pack.replaceAll("\\.", "/");
-                final StringBuilder javaFile = generateMethod(
-                        fullyQualifiedName, methodName, parameterTypes,
-                        exceptionTypes),
-                        fullJavaClassName = new StringBuilder();
-                fullJavaClassName.append(pack).append(".");
-                appendJavaClassName(fullyQualifiedName, methodName,
-                        parameterTypes, fullJavaClassName);
+                final String methodName = method.getName();
+                final String fileName = appendJavaClassName(new StringBuilder())
+                        .append(".java").toString();
+                final String pack = fullyQualifiedName
+                        .substring(0, fullyQualifiedName.lastIndexOf('.'));
+                final String directoryName = pack.replaceAll("\\.", "/");
+                final StringBuilder javaFile = generateMethod(fullyQualifiedName,
+                        methodName, parameterTypes, exceptionTypes);
+                final StringBuilder fullJavaClassName = new StringBuilder()
+                        .append(pack).append(".");
+                appendJavaClassName(fullJavaClassName);
                 final MainClass mainClass = new MainClass(javaFile, fileName,
                         directoryName, fullJavaClassName.toString());
                 result.add(mainClass);
@@ -131,21 +138,18 @@ public class MainGenerator {
                                                 Type[] parameterTypes,
                                                 StringBuilder sb) {
         sb.append(indentation).append("public class ");
-        appendJavaClassName(fullyQualifiedName, methodName, parameterTypes, sb);
+        appendJavaClassName(sb);
         return sb.append(" {\n");
     }
 
-    private StringBuilder appendJavaClassName(String fullyQualifiedClassName,
-                                              String methodName,
-                                              Type[] parameterTypes,
-                                              StringBuilder sb) {
-        sb.append("jmlcute__").append(fullyQualifiedClassName
-                .replaceAll("\\.", "__")).append("__").append(methodName);
-        for (Type type : parameterTypes) {
-            String typeName = ((Class) type).getName().replaceAll("\\.", "__");
-            sb.append("_").append(typeName);
-        }
-        return sb;
+    /**
+     * Appends the java class name to sb.
+     *
+     * @param sb the StringBuilder to append to.
+     * @return sb with the appended java class name.
+     */
+    private StringBuilder appendJavaClassName(StringBuilder sb) {
+        return sb.append("jmlcute").append(counter);
     }
 
     private StringBuilder appendJavaClassFooter(StringBuilder sb) {
@@ -187,5 +191,32 @@ public class MainGenerator {
         }
         sb.append(");\n");
         return sb;
+    }
+
+    /**
+     * Checks whether method should be generated. Only generates, if the method
+     * is public, instance (non-static), and its name and parameter types are
+     * legal java names.
+     *
+     * @param method the method to check.
+     * @return true, if the method is to be generated. Otherwise, false.
+     */
+    private boolean isMethodGeneratable(final Method method) {
+        boolean result = true;
+        final int modifiers = method.getModifiers();
+        result &= Modifier.isPublic(modifiers) && !Modifier.isStatic(modifiers);
+        final Collection<char[]> names = new ArrayList<char[]>();
+        names.add(method.getName().toCharArray());
+        for (final Type type : method.getGenericParameterTypes()) {
+            final String typeName = ((Class) type).getName();
+            names.add(typeName.toCharArray());
+        }
+        for (final char[] name : names) {
+            result &= Character.isJavaIdentifierStart(name[1]);
+            for (int i = 1; i < name.length; i++) {
+                result &= Character.isJavaIdentifierPart(name[i]) || name[i] == '.';
+            }
+        }
+        return result;
     }
 }

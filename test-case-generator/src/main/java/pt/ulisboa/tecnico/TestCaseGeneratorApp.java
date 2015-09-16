@@ -3,6 +3,8 @@ package pt.ulisboa.tecnico;
 import cute.Cute;
 import cute.concolic.logging.BranchCoverageLog;
 import cute.concolic.logging.JUnitTestGenerator;
+import pt.ulisboa.tecnico.internal.InteractiveModeImpl;
+import pt.ulisboa.tecnico.internal.NullInteractiveMode;
 
 import javax.tools.*;
 import java.io.*;
@@ -17,9 +19,11 @@ public class TestCaseGeneratorApp {
     private String mainCompileDestFolder = "classes";
     private String mainInstrDestJar = "jmlcute-processed-classes.jar";
     private String testCasesDestFolder = "generated-test-sources";
+    private String covLogDestFolder = "cov-log";
+    private InteractiveMode interactiveMode = new NullInteractiveMode();
     private int concolicIterations = 10;
     private boolean resetSearch = true;
-    private boolean forceCreation = true;
+    private int concolicIteration = 0;
 
     public String getMainGenDestFolder() {
         return mainGenDestFolder;
@@ -37,6 +41,10 @@ public class TestCaseGeneratorApp {
         return testCasesDestFolder;
     }
 
+    public String getCovLogDestFolder() {
+        return covLogDestFolder;
+    }
+
     public String getClasspath() {
         return System.getProperty("java.class.path");
     }
@@ -45,9 +53,13 @@ public class TestCaseGeneratorApp {
         return concolicIterations;
     }
 
+    public InteractiveMode getInteractiveMode() {
+        return interactiveMode;
+    }
+
     public void resetConcolicExecution() {
         resetSearch = true;
-        forceCreation = true;
+        concolicIteration = 0;
     }
 
     /**
@@ -85,18 +97,18 @@ public class TestCaseGeneratorApp {
                 }
                 app.instrumentMain(mainClass);
                 app.resetConcolicExecution();
-                for (int testId = 1, j = 0;
-                     j < app.getConcolicIterations(); j++) {
-                    int exit = app.runMain(mainClass);
+                for (int j = 0; j < app.getConcolicIterations(); j++) {
+                    final int exit = app.runMain(mainClass);
                     if (exit == -1) {
                         break mainClass;
                     }
-                    app.generateJUnitTestCase(mainClass, testId++, exit);
+                    app.generateJUnitTestCase(mainClass, exit);
                     if (app.isExitState(exit, Cute.EXIT_COMPLETE)) {
                         break;
                     }
                 }
-                BranchCoverageLog.main(new String[]{"."});
+                app.printCoverageLog(mainClass);
+                app.getInteractiveMode().methodConcolicallyExecuted();
             }
         }
         fileManager.close();
@@ -107,7 +119,7 @@ public class TestCaseGeneratorApp {
      *******************/
 
     /**
-     * Processes arguments
+     * Processes arguments.
      *
      * @param args the arguments to process.
      * @return the index of the first not processed argument, or -1, if no arguments are left to process.
@@ -155,6 +167,16 @@ public class TestCaseGeneratorApp {
                 } else {
                     testCasesDestFolder = args[++i];
                 }
+            } else if (args[i].equals("-cov-log-d")) {
+                if (i + 1 >= args.length) {
+                    System.err.println("No destination folder was specified " +
+                            "after -cov-log-d.");
+                    return -1;
+                } else {
+                    covLogDestFolder = args[++i];
+                }
+            } else if (args[i].equals("-interactive")) {
+                interactiveMode = new InteractiveModeImpl();
             } else if (args[i].equals("-i")) {
                 if (i + 1 >= args.length) {
                     System.err.println("No iteration value was specified " +
@@ -185,16 +207,11 @@ public class TestCaseGeneratorApp {
             DiagnosticCollector<JavaFileObject> diagnostics,
             StandardJavaFileManager fileManager,
             MainClass mainClass) throws IOException {
-        final File f = new File(getMainGenDestFolder() + "/" + mainClass
-                .getDirectoryName(), mainClass.getFileName());
-        if (f.exists()) {
-            f.delete();
-        } else {
-            f.getParentFile().mkdirs();
-            f.createNewFile();
-        }
-        final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream(f), "UTF-8"));
+        final File dir = new File(getMainGenDestFolder(), mainClass
+                .getDirectoryName());
+        dir.mkdirs();
+        final File f = new File(dir, mainClass.getFileName());
+        final BufferedWriter writer = new BufferedWriter(new FileWriter(f));
         writer.write(mainClass.getJavaFile().toString());
         writer.close();
         final Collection<String> options = new ArrayList<String>();
@@ -204,8 +221,8 @@ public class TestCaseGeneratorApp {
         options.add(getMainCompileDestFolder());
         final Iterable<? extends JavaFileObject> compilationUnits = fileManager
                 .getJavaFileObjects(f);
-        final boolean compiled = compiler.getTask(null, fileManager, diagnostics,
-                options, null, compilationUnits).call();
+        final boolean compiled = compiler.getTask(null, fileManager,
+                diagnostics, options, null, compilationUnits).call();
         if (compiled) {
             return true;
         } else {
@@ -240,9 +257,11 @@ public class TestCaseGeneratorApp {
                 final BufferedReader br = new BufferedReader(
                         new InputStreamReader(process.getInputStream()));
                 try {
-                    while (br.readLine() != null) {
-                        //Ignore line.
+                    String line, secondToLastLine = "";
+                    while ((line = br.readLine()) != null) {
+                        secondToLastLine = line;
                     }
+                    System.out.println(secondToLastLine);
                     br.close();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -346,34 +365,50 @@ public class TestCaseGeneratorApp {
     }
 
     /**
-     * Generates the test case resulting from the last concolic execution, if
-     * the test case increases coverage and does not violate an assumption.
+     * Generates the test case resulting from the last concolic execution.
+     * TODO: Only generate, if the test case increases coverage and does not violate an assumption: isExitState(exit, Cute.EXIT_ASSUME_FAILED) || !isExitState(exit, Cute.EXIT_COVERAGE_INCREASED).
      *
      * @param mainClass the MainClass to generate test cases for.
-     * @param testId    the id of the test case that will be part of the name
-     *                  of the test case method.
      * @param exit      the exit code of the previous concolic execution.
      * @return true, if the test case was generated. Otherwise, false.
      */
-    private boolean generateJUnitTestCase(MainClass mainClass, int testId,
-                                          int exit) {
-        if (isExitState(exit, Cute.EXIT_ASSUME_FAILED) || !isExitState(exit,
-                Cute.EXIT_COVERAGE_INCREASED)) {
-            return false;
-        }
+    private boolean generateJUnitTestCase(MainClass mainClass, int exit) {
         final String fullName = mainClass.getFullyQualifiedName();
         final String pack = fullName.substring(0, fullName.lastIndexOf('.'));
         final String name = fullName.substring(fullName.lastIndexOf('.') + 1);
-        String comment = "";
-        if (isExitState(exit, Cute.EXIT_ASSERT_FAILED)) {
-            comment = "This test case causes a specification violation.";
+        final StringBuilder comment = new StringBuilder();
+        if (isExitState(exit, Cute.EXIT_ASSUME_FAILED)) {
+            comment.append("This test case causes an assumption violation.\n");
         }
-        JUnitTestGenerator.setForceCreation(forceCreation);
-        boolean appended = JUnitTestGenerator.appendToJunitTestCase(
-                getTestCasesDestFolder(), pack, name, testId, comment);
+        if (isExitState(exit, Cute.EXIT_COVERAGE_INCREASED)) {
+            comment.append("This test case increases coverage.\n");
+        }
+        if (isExitState(exit, Cute.EXIT_ASSERT_FAILED)) {
+            comment.append("This test case causes a specification violation.\n");
+        }
+        JUnitTestGenerator.setForceCreation(concolicIteration == 0);
+        final boolean appended = JUnitTestGenerator.appendToJunitTestCase(
+                getTestCasesDestFolder(), pack, name, concolicIteration,
+                comment.toString());
         if (appended) {
-            forceCreation = false;
+            concolicIteration++;
         }
         return appended;
+    }
+
+    /**
+     * Prints the coverage log of the previous concolic execution.
+     *
+     * @param mainClass the class executed in the previous concolic execution.
+     * @throws FileNotFoundException if the log could not be found.
+     */
+    private void printCoverageLog(MainClass mainClass) throws FileNotFoundException {
+        final File covDir = new File(getCovLogDestFolder());
+        covDir.mkdirs();
+        final File covLogFile = new File(covDir, mainClass.getFileName());
+        final PrintStream ps = new PrintStream(new BufferedOutputStream(
+                new FileOutputStream(covLogFile)));
+        BranchCoverageLog.printCoverageLog(ps);
+        ps.close();
     }
 }
